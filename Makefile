@@ -1,4 +1,7 @@
 
+run:
+	air -- --config=.env
+
 # --- Database ---
 db-up:
 	docker compose -f=docker/docker-compose.db.yml -p=pg_bot up
