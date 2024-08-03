@@ -1,26 +1,46 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"log"
+	"log/slog"
 
-	"github.com/fenek-dev/go-outline-bot/pkg/outline_client"
+	"github.com/fenek-dev/go-outline-bot/configs"
+	"github.com/fenek-dev/go-outline-bot/internal/services"
+	"github.com/fenek-dev/go-outline-bot/internal/storage/pg"
+	"github.com/fenek-dev/go-outline-bot/internal/telegram"
+	"github.com/fenek-dev/go-outline-bot/internal/telegram/handlers"
 	"github.com/fenek-dev/go-outline-bot/pkg/payment_service"
 )
 
 func main() {
-	// This is a placeholder for the main function
-	cert := "03245423789118C805AF7C10AFE2E7F8AD257DEFF99DE264634B4DF380333DFB"
-	apiUrl := "https://5.42.73.65:50279/gPHqLn1TGr8zo3fjqyw0Dw"
+	ctx := context.Background()
+	cfg := configs.MustLoad()
 
-	_, err := outline_client.NewOutlineVPN(apiUrl, cert)
+	storage := pg.New(
+		ctx,
+		cfg.DbUrl,
+		pg.WithMaxConnections(100),
+		pg.WithMinConnections(10),
+	)
+	log.Println("Db connected")
+
+	paymentClient := payment_service.NewClient(
+		"",
+		payment_service.WithLogger(slog.Default()),
+	)
+
+	service := services.New(storage, paymentClient)
+	tgHandlers := handlers.New(service)
+
+	bot, err := telegram.InitBot(&cfg.Tg, tgHandlers)
+	log.Println("Telegram bot api inited")
+
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("Can not connect to telegram bot: %e", err))
 	}
 
-	paymentClient := payment_service.NewClient(&payment_service.Options{
-		BaseUrl: "https://api.payment-service.com",
-	}, nil, nil)
-
-	fmt.Println(paymentClient)
+	bot.Start()
 
 }
