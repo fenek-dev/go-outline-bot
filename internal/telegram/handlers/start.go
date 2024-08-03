@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/fenek-dev/go-outline-bot/internal/markup"
 	"github.com/fenek-dev/go-outline-bot/internal/storage"
 	"gopkg.in/telebot.v3"
 	"time"
@@ -19,8 +20,9 @@ func (h *Handlers) Start(c telebot.Context) (err error) {
 	err = h.service.CreateUser(ctx, user)
 
 	if err != nil && !errors.Is(err, storage.ErrUserAlreadyExists) {
-		return fmt.Errorf("unexpected error")
+		c.Send("Something gone wrong, try again")
+		return fmt.Errorf("unexpected error: %e", err)
 	}
 
-	return c.Send("Welcome to the club, buddy")
+	return c.Send("Welcome to the club, buddy", markup.Menu)
 }

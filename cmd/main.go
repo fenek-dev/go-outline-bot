@@ -8,6 +8,7 @@ import (
 	"github.com/fenek-dev/go-outline-bot/internal/storage/pg"
 	"github.com/fenek-dev/go-outline-bot/internal/telegram"
 	"github.com/fenek-dev/go-outline-bot/internal/telegram/handlers"
+	"log"
 )
 
 func main() {
@@ -20,12 +21,13 @@ func main() {
 		pg.WithMaxConnections(100),
 		pg.WithMinConnections(10),
 	)
+	log.Println("Db connected")
 
 	service := services.New(storage)
-
 	tgHandlers := handlers.New(service)
 
 	bot, err := telegram.InitBot(&cfg.Tg, tgHandlers)
+	log.Println("Telegram bot api inited")
 
 	if err != nil {
 		panic(fmt.Sprintf("Can not connect to telegram bot: %e", err))

@@ -14,6 +14,7 @@ type Config struct {
 }
 
 type TelegramConfig struct {
+	Debug bool   `env:"DEBUG"`
 	Token string `yaml:"token" env:"TELEGRAM_TOKEN"`
 }
 
