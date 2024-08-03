@@ -9,9 +9,6 @@ CREATE TABLE IF NOT EXISTS users
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-
-CREATE TRIGGER update_users_updated_at
-    BEFORE UPDATE
-    ON public.users
-    FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_users_updated_at BEFORE
+UPDATE ON public.users FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column ();
