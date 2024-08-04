@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"github.com/jackc/pgx/v5"
 	"log/slog"
 	"sync"
 	"time"
@@ -21,7 +22,8 @@ type Storage interface {
 	IncBalanceTx(ctx context.Context, tx pg.Executor, userID uint64, amount uint64) (err error)
 	DecBalanceTx(ctx context.Context, tx pg.Executor, userID uint64, amount uint64) (err error)
 
-	GetTariff(ctx context.Context, tariffID uint64) (tariff models.Tariff, err error)
+	GetTariff(ctx context.Context, tariffID uint64) (tariff *models.Tariff, err error)
+	GetTariffsByServer(ctx context.Context, serverId uint64) (tariffs []*models.Tariff, err error)
 
 	CreateTransaction(ctx context.Context, transaction *models.Transaction) (err error)
 	CreateTransactionTx(ctx context.Context, tx pg.Executor, transaction *models.Transaction) (terr error)
@@ -33,8 +35,9 @@ type Storage interface {
 	ProlongSubscriptionTx(ctx context.Context, tx pg.Executor, subscriptionID uint64, expiredAt time.Time) (err error)
 
 	GetServer(ctx context.Context, serverID uint64) (server models.Server, err error)
+	GetAllServers(ctx context.Context) (servers []*models.Server, err error)
 
-	WithTx(ctx context.Context, label string, fn func(ctx context.Context, tx pg.Executor) error) (err error)
+	WithTx(ctx context.Context, label string, fn func(ctx context.Context, tx pg.Executor) error, options *pgx.TxOptions, opts ...pg.TxOption) (err error)
 }
 
 type Service struct {

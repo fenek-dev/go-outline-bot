@@ -2,10 +2,10 @@ package telegram
 
 import (
 	"fmt"
+	m "github.com/fenek-dev/go-outline-bot/internal/telegram/markup"
 	"time"
 
 	"github.com/fenek-dev/go-outline-bot/configs"
-	"github.com/fenek-dev/go-outline-bot/internal/markup"
 	"github.com/fenek-dev/go-outline-bot/internal/telegram/handlers"
 	"gopkg.in/telebot.v3"
 )
@@ -27,28 +27,41 @@ func InitBot(cfg *configs.TelegramConfig, h *handlers.Handlers) (*telebot.Bot, e
 		return nil, fmt.Errorf("can not connect to telegram bot: %w", err)
 	}
 
-	markup.Init()
+	m.Init()
 
 	b.Handle("/start", h.Start)
 
-	b.Handle(&markup.InfoOpenBtn, h.OpenInfo)
-	b.Handle(&markup.InfoClose, h.CloseInfo)
+	b.Handle(&m.ClientListOpenBtn, h.OpenClientsList)
 
-	b.Handle(&markup.ClientListOpenBtn, h.OpenClientsList)
+	b.Handle(&m.ClientListClose, h.Close)
 
-	b.Handle(&markup.ClientListBack, h.BackClientsList)
+	b.Handle(&m.ClientListIOS, h.ClientsListIOS)
+	b.Handle(&m.IOSListBackBtn, h.BackMacOSList)
 
-	b.Handle(&markup.ClientListIOS, h.ClientsListIOS)
-	b.Handle(&markup.IOSListBackBtn, h.BackMacOSList)
+	b.Handle(&m.ClientListAndroid, h.ClientsListAndroid)
+	b.Handle(&m.AndroidListBackBtn, h.BackAndroidList)
 
-	b.Handle(&markup.ClientListAndroid, h.ClientsListAndroid)
-	b.Handle(&markup.AndroidListBackBtn, h.BackAndroidList)
+	b.Handle(&m.ClientListWindows, h.ClientsListWindows)
+	b.Handle(&m.WindowsListBackBtn, h.BackWindowsList)
 
-	b.Handle(&markup.ClientListWindows, h.ClientsListWindows)
-	b.Handle(&markup.WindowsListBackBtn, h.BackWindowsList)
+	b.Handle(&m.ClientListMacOS, h.ClientsListMacOS)
+	b.Handle(&m.MacOSListBackBtn, h.BackMacOSList)
 
-	b.Handle(&markup.ClientListMacOS, h.ClientsListMacOS)
-	b.Handle(&markup.MacOSListBackBtn, h.BackMacOSList)
+	// Keys
+	b.Handle(&m.KeysOpenBtn, h.OpenKeysMenu)
+	b.Handle(&m.KeysCloseBtn, h.Close)
+
+	//Servers
+	b.Handle(&m.KeysGetNewBtn, h.OpenServersMenu)
+	b.Handle(&m.ServersBackBtn, h.BackServersMenu)
+
+	b.Handle(&m.ServerItem, h.OpenTariffsMenu)
+	b.Handle(&m.TariffsBackBtn, h.BackTariffsMenu)
+
+	b.Handle(&m.TariffItem, h.OpenTariff)
+
+	b.Handle(&m.TariffCloseBtn, h.Close)
+	b.Handle(&m.TariffBuyBtn, h.BuySubscription)
 
 	return b, nil
 }

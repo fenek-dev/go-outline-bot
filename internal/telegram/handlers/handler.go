@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"github.com/fenek-dev/go-outline-bot/internal/models"
 	"gopkg.in/telebot.v3"
 	"log/slog"
 	"time"
@@ -11,6 +12,11 @@ type Option func(*Handlers)
 
 type Service interface {
 	CreateUser(ctx context.Context, user *telebot.User) (err error)
+
+	GetAllServers(ctx context.Context) (servers []*models.Server, err error)
+
+	GetTariff(ctx context.Context, tariffId uint64) (tariff *models.Tariff, err error)
+	GetTariffsByServer(ctx context.Context, serverId uint64) (tariffs []*models.Tariff, err error)
 }
 
 type Handlers struct {

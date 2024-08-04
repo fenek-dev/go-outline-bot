@@ -5,19 +5,16 @@ import (
 )
 
 var (
-	Menu        = &t.ReplyMarkup{ResizeKeyboard: true}
-	InfoOpenBtn = Menu.Text("ℹ Информация")
-
-	Info              = &t.ReplyMarkup{}
-	InfoClose         = ClientList.Data("❌Закрыть", "InfoClose")
-	ClientListOpenBtn = Info.Data("📱Список клиентов", "ClientList")
+	Menu              = &t.ReplyMarkup{ResizeKeyboard: true}
+	ClientListOpenBtn = Menu.Text("📱Список клиентов")
+	KeysOpenBtn       = Menu.Text("🔑Ключи")
 
 	ClientList        = &t.ReplyMarkup{}
 	ClientListAndroid = ClientList.Data("🤖Android", "Android")
 	ClientListIOS     = ClientList.Data("📱IOS", "IOS")
 	ClientListWindows = ClientList.Data("🖥️Windows", "Windows")
 	ClientListMacOS   = ClientList.Data("💻MacOS", "MacOS")
-	ClientListBack    = ClientList.Data("⬅ Назад", "ClientListBack")
+	ClientListClose   = ClientList.Data("❌Закрыть", "ClientListClose")
 
 	AndroidList        = &t.ReplyMarkup{}
 	AndroidListBackBtn = AndroidList.Data("⬅ Назад", "AndroidListBack")
