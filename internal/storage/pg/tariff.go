@@ -7,11 +7,11 @@ import (
 	"github.com/georgysavva/scany/v2/pgxscan"
 )
 
-func (p *Postgres) GetTariff(ctx context.Context, tariffID uint64) (*models.Tariff, error) {
-	tariff := &models.Tariff{}
-	err := pgxscan.Get(ctx, p.conn, tariff, "SELECT * FROM tariffs WHERE id = $1", tariffID)
+func (p *Postgres) GetTariff(ctx context.Context, tariffID uint64) (tariff models.Tariff, err error) {
+
+	err = pgxscan.Get(ctx, p.conn, &tariff, "SELECT * FROM tariffs WHERE id = $1", tariffID)
 	if err != nil {
-		return nil, err
+		return tariff, err
 	}
 
 	return tariff, err

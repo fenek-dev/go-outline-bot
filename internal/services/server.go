@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *Service) CreateKey(ctx context.Context, tariff *models.Tariff) (key *outline_client.OutlineKey, err error) {
+func (s *Service) CreateKey(ctx context.Context, tariff models.Tariff) (key *outline_client.OutlineKey, err error) {
 	server, err := s.storage.GetServer(ctx, tariff.ServerID)
 	if err != nil {
 		return nil, err

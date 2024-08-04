@@ -18,7 +18,7 @@ type Service interface {
 
 	GetAllServers(ctx context.Context) (servers []models.Server, err error)
 
-	GetTariff(ctx context.Context, tariffId uint64) (tariff *models.Tariff, err error)
+	GetTariff(ctx context.Context, tariffId uint64) (tariff models.Tariff, err error)
 	GetTariffsByServer(ctx context.Context, serverId uint64) (tariffs []models.Tariff, err error)
 }
 

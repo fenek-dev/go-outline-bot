@@ -10,6 +10,6 @@ func (s *Service) GetTariffsByServer(ctx context.Context, serverId uint64) (tari
 	return s.storage.GetTariffsByServer(ctx, serverId)
 }
 
-func (s *Service) GetTariff(ctx context.Context, tariffId uint64) (tariff *models.Tariff, err error) {
+func (s *Service) GetTariff(ctx context.Context, tariffId uint64) (tariff models.Tariff, err error) {
 	return s.storage.GetTariff(ctx, tariffId)
 }

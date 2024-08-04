@@ -8,8 +8,13 @@ import (
 )
 
 func (p *Postgres) GetServer(ctx context.Context, serverID uint64) (server models.Server, err error) {
-	//TODO implement me
-	return server, err
+
+	err = pgxscan.Get(ctx, p.conn, &server, "SELECT * FROM servers WHERE id = $1", serverID)
+	if err != nil {
+		return server, err
+	}
+
+	return server, nil
 }
 func (p *Postgres) GetAllServers(ctx context.Context) (servers []models.Server, err error) {
 	rows, err := p.conn.Query(ctx, "SELECT * FROM servers")

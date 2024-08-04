@@ -78,7 +78,7 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 			return err
 		}
 
-		err = s.storage.UserBonusUsedTx(ctx, tx, user.ID)
+		err = s.storage.SetUserBonusUsedTx(ctx, tx, user.ID)
 
 		return err
 	}, nil)
@@ -87,7 +87,7 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 }
 
 func (s *Service) GetSubscriptions(ctx context.Context, user models.User) (subscriptions []models.Subscription, err error) {
-	return s.storage.GetSubscriptions(ctx, user.ID)
+	return s.storage.GetSubscriptionsByUser(ctx, user.ID)
 }
 
 // TODO: EnableAutoProlongation
@@ -179,7 +179,7 @@ func (s *Service) ProlongSubscription(ctx context.Context, subscription models.S
 	return nil
 }
 
-func (s *Service) GetTariffPrice(ctx context.Context, tariff *models.Tariff, user models.User) (price uint32, discountPercent uint8) {
+func (s *Service) GetTariffPrice(ctx context.Context, tariff models.Tariff, user models.User) (price uint32, discountPercent uint8) {
 	if user.PartnerID != nil && !user.BonusUsed {
 		discountPercent := uint32(10) // @TODO: To config PARTNER_DISCOUNT_PERCENT
 		price := tariff.Price - (tariff.Price * discountPercent / 100)
