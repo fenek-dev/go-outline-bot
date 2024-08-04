@@ -17,7 +17,7 @@ type Executor interface {
 
 type TxOption func(ctx context.Context, tx pgx.Tx) error
 
-func (s *Postgres) WithTx(
+func (p *Postgres) WithTx(
 	ctx context.Context,
 	label string,
 	fn func(ctx context.Context, tx Executor) error,
@@ -26,9 +26,9 @@ func (s *Postgres) WithTx(
 ) (err error) {
 	var tx pgx.Tx
 	if opts != nil {
-		tx, err = s.conn.BeginTx(ctx, *opts)
+		tx, err = p.conn.BeginTx(ctx, *opts)
 	} else {
-		tx, err = s.conn.Begin(ctx)
+		tx, err = p.conn.Begin(ctx)
 	}
 	if err != nil {
 		return
