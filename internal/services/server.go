@@ -58,3 +58,17 @@ func (s *Service) DeactivateKey(ctx context.Context, subscription models.Subscri
 
 	return nil
 }
+
+func (s *Service) GetBandwidthMetrics(ctx context.Context, server models.Server) (metrics map[string]uint64, err error) {
+	client, err := outline_client.NewOutlineVPN(server.IP, server.APIKey)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := client.GetTransferMetrics()
+	if err != nil {
+		return nil, err
+	}
+
+	return response.BytesTransferredByUserId, nil
+}

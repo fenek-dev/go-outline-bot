@@ -2,6 +2,7 @@ package pg
 
 import (
 	"context"
+
 	"github.com/fenek-dev/go-outline-bot/internal/models"
 	"github.com/georgysavva/scany/v2/pgxscan"
 )
@@ -10,8 +11,7 @@ func (p *Postgres) GetServer(ctx context.Context, serverID uint64) (server model
 	//TODO implement me
 	return server, err
 }
-func (p *Postgres) GetAllServers(ctx context.Context) (servers []*models.Server, err error) {
-
+func (p *Postgres) GetAllServers(ctx context.Context) (servers []models.Server, err error) {
 	rows, err := p.conn.Query(ctx, "SELECT * FROM servers")
 	if err != nil {
 		return nil, err

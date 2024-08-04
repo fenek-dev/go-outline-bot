@@ -6,10 +6,9 @@ import (
 )
 
 type Service interface {
-	CheckProlongations(ctx context.Context) (err error)
 	CheckExpireSubscriptions(ctx context.Context) (err error)
-	UpdateBandwidths(ctx context.Context) (err error)
 	CheckBandwidthLimits(ctx context.Context) (err error)
+	UpdateBandwidths(ctx context.Context) (err error)
 }
 
 type Worker struct {
@@ -40,19 +39,6 @@ func (w *Worker) RunCheckExpireSubscriptions() {
 				return
 			default:
 				w.service.CheckExpireSubscriptions(context.Background())
-			}
-		}
-	}()
-}
-
-func (w *Worker) RunCheckProlongations() {
-	go func() {
-		for {
-			select {
-			case <-w.stopSignal:
-				return
-			default:
-				w.service.CheckProlongations(context.Background())
 			}
 		}
 	}()
