@@ -48,7 +48,7 @@ func main() {
 
 	httpServer.Handle(http.MethodGet, "/health", httpServer.HealthHandler)
 	httpServer.Handle(http.MethodPost, "/payment/webhook", httpServer.PaymentWebhookHandler)
-	httpServer.Run()
+	go httpServer.Run()
 
 	tgHandlers := handlers.New(service)
 
