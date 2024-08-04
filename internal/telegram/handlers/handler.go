@@ -13,6 +13,8 @@ type Option func(*Handlers)
 type Service interface {
 	CreateUser(ctx context.Context, user *telebot.User) (err error)
 
+	GetBalance(ctx context.Context, userId uint64) (balance uint32, err error)
+
 	GetAllServers(ctx context.Context) (servers []*models.Server, err error)
 
 	GetTariff(ctx context.Context, tariffId uint64) (tariff *models.Tariff, err error)

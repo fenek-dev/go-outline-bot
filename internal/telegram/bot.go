@@ -33,7 +33,7 @@ func InitBot(cfg *configs.TelegramConfig, h *handlers.Handlers) (*telebot.Bot, e
 
 	b.Handle(&m.ClientListOpenBtn, h.OpenClientsList)
 
-	b.Handle(&m.ClientListClose, h.Close)
+	b.Handle(&m.CloseBtn, h.Close)
 
 	b.Handle(&m.ClientListIOS, h.ClientsListIOS)
 	b.Handle(&m.IOSListBackBtn, h.BackMacOSList)
@@ -49,7 +49,6 @@ func InitBot(cfg *configs.TelegramConfig, h *handlers.Handlers) (*telebot.Bot, e
 
 	// Keys
 	b.Handle(&m.KeysOpenBtn, h.OpenKeysMenu)
-	b.Handle(&m.KeysCloseBtn, h.Close)
 
 	//Servers
 	b.Handle(&m.KeysGetNewBtn, h.OpenServersMenu)
@@ -58,10 +57,11 @@ func InitBot(cfg *configs.TelegramConfig, h *handlers.Handlers) (*telebot.Bot, e
 	b.Handle(&m.ServerItem, h.OpenTariffsMenu)
 	b.Handle(&m.TariffsBackBtn, h.BackTariffsMenu)
 
+	// Tariffs
 	b.Handle(&m.TariffItem, h.OpenTariff)
-
-	b.Handle(&m.TariffCloseBtn, h.Close)
 	b.Handle(&m.TariffBuyBtn, h.BuySubscription)
 
+	// Balance
+	b.Handle(&m.BalanceOpenBtn, h.OpenBalance)
 	return b, nil
 }

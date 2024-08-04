@@ -19,6 +19,10 @@ var (
 	ErrPhoneNumberEmpty BalanceErrors = errors.New("phone number is empty")
 )
 
+func (s *Service) GetBalance(ctx context.Context, userId uint64) (balance uint32, err error) {
+	return s.storage.GetBalance(ctx, userId)
+}
+
 func (s *Service) RefreshBalance(ctx context.Context, user models.User) (balance int64, err error) {
 	// TODO: calc balance by all user transactions
 	return 0, nil
@@ -142,7 +146,7 @@ func (s *Service) ConfirmDeposit(ctx context.Context, user models.User, transact
 		}
 
 		return nil
-	})
+	}, nil)
 
 	return err
 }

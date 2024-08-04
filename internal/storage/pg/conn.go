@@ -18,19 +18,39 @@ type Postgres struct {
 	log *slog.Logger
 }
 
+func (p *Postgres) UserBonusUsedTx(ctx context.Context, tx Executor, userID uint64) (err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p *Postgres) IncBalanceTx(ctx context.Context, tx Executor, userID uint64, amount uint32) (err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p *Postgres) DecBalanceTx(ctx context.Context, tx Executor, userID uint64, amount uint32) (err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p *Postgres) GetTransaction(ctx context.Context, transactionID uint64) (transaction models.Transaction, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p *Postgres) GetTransactions(ctx context.Context, userID uint64) (transactions []models.Transaction, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p *Postgres) UpdateTransactionStatusTx(ctx context.Context, tx Executor, transactionID uint64, status models.TransactionStatus) (err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (p *Postgres) GetUser(ctx context.Context, userID uint64) (user models.User, err error) {
 	//TODO implement me
 	return user, err
-}
-
-func (p *Postgres) IncBalanceTx(ctx context.Context, tx Executor, userID uint64, amount uint64) (err error) {
-	//TODO implement me
-	return err
-}
-
-func (p *Postgres) DecBalanceTx(ctx context.Context, tx Executor, userID uint64, amount uint64) (err error) {
-	//TODO implement me
-	return err
 }
 
 func (p *Postgres) CreateTransaction(ctx context.Context, transaction *models.Transaction) (err error) {

@@ -20,6 +20,7 @@ type Storage interface {
 	GetUser(ctx context.Context, userID uint64) (user models.User, err error)
 	UserBonusUsedTx(ctx context.Context, tx pg.Executor, userID uint64) (err error)
 
+	GetBalance(ctx context.Context, userID uint64) (balance uint32, err error)
 	IncBalanceTx(ctx context.Context, tx pg.Executor, userID uint64, amount uint32) (err error)
 	DecBalanceTx(ctx context.Context, tx pg.Executor, userID uint64, amount uint32) (err error)
 

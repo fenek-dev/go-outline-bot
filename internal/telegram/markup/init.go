@@ -3,7 +3,8 @@ package markup
 func Init() {
 	// --- Menu ---
 	Menu.Reply(
-		Menu.Row(ClientListOpenBtn, KeysOpenBtn),
+		Menu.Row(KeysOpenBtn, BalanceOpenBtn),
+		Menu.Row(ClientListOpenBtn, InviteOpenBtn),
 	)
 
 	ClientList.Inline(
@@ -11,7 +12,7 @@ func Init() {
 		ClientList.Row(ClientListAndroid),
 		ClientList.Row(ClientListWindows),
 		ClientList.Row(ClientListMacOS),
-		ClientList.Row(ClientListClose),
+		ClientList.Row(CloseBtn),
 	)
 
 	IOSList.Inline(
@@ -44,7 +45,7 @@ func Init() {
 	//--- Keys ---
 	KeysMenu.Inline(
 		KeysMenu.Row(KeysGetNewBtn),
-		KeysMenu.Row(KeysCloseBtn),
+		KeysMenu.Row(CloseBtn),
 	)
 
 	//--- Tariffs ---
@@ -54,6 +55,14 @@ func Init() {
 
 	TariffInfo.Inline(
 		TariffInfo.Row(TariffBuyBtn),
-		TariffInfo.Row(TariffCloseBtn),
+		TariffInfo.Row(CloseBtn),
+	)
+
+	//--- Balance ---
+
+	Balance.Inline(
+		Balance.Row(BalanceRecharge),
+		Balance.Row(BalanceHistory),
+		Balance.Row(CloseBtn),
 	)
 }
