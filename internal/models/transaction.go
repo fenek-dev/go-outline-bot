@@ -20,10 +20,14 @@ const (
 )
 
 type TransactionMeta struct {
-	IsCoupon       *bool   `json:"is_coupon"`
-	IsProlongation *bool   `json:"is_prolongation"`
-	CouponID       *uint64 `json:"coupon_id"`
-	SubscriptionID *uint64 `json:"subscription_id"`
+	IsCoupon        *bool   `json:"is_coupon"`
+	IsDiscounted    *bool   `json:"is_discounted"`
+	IsProlongation  *bool   `json:"is_prolongation"`
+	IsCommission    *bool   `json:"is_commission"`
+	ReferalID       *uint64 `json:"referal_id"`
+	CouponID        *uint64 `json:"coupon_id"`
+	SubscriptionID  *uint64 `json:"subscription_id"`
+	DiscountPercent *uint8  `json:"discount_percent"`
 }
 
 type Transaction struct {
