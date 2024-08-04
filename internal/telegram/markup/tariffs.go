@@ -7,7 +7,6 @@ var (
 	TariffsBackBtn = TariffsMenu.Data("⬅ Назад", "TariffsClose")
 	TariffItem     = TariffsMenu.Data("Тариф", "TariffItem")
 
-	TariffInfo     = &t.ReplyMarkup{}
-	TariffBuyBtn   = TariffInfo.Data("💳 Купить", "TariffBuy")
-	TariffCloseBtn = TariffInfo.Data("❌ Закрыть", "TariffClose")
+	TariffInfo   = &t.ReplyMarkup{}
+	TariffBuyBtn = TariffInfo.Data("💳 Купить", "TariffBuy")
 )
