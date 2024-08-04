@@ -2,11 +2,12 @@ package telegram
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/fenek-dev/go-outline-bot/configs"
 	"github.com/fenek-dev/go-outline-bot/internal/markup"
 	"github.com/fenek-dev/go-outline-bot/internal/telegram/handlers"
 	"gopkg.in/telebot.v3"
-	"time"
 )
 
 func InitBot(cfg *configs.TelegramConfig, h *handlers.Handlers) (*telebot.Bot, error) {

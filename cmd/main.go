@@ -3,12 +3,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"log/slog"
+
 	"github.com/fenek-dev/go-outline-bot/configs"
 	"github.com/fenek-dev/go-outline-bot/internal/services"
 	"github.com/fenek-dev/go-outline-bot/internal/storage/pg"
 	"github.com/fenek-dev/go-outline-bot/internal/telegram"
 	"github.com/fenek-dev/go-outline-bot/internal/telegram/handlers"
-	"log"
+	"github.com/fenek-dev/go-outline-bot/pkg/payment_service"
 )
 
 func main() {
@@ -23,7 +26,12 @@ func main() {
 	)
 	log.Println("Db connected")
 
-	service := services.New(storage)
+	paymentClient := payment_service.NewClient(
+		"",
+		payment_service.WithLogger(slog.Default()),
+	)
+
+	service := services.New(storage, paymentClient)
 	tgHandlers := handlers.New(service)
 
 	bot, err := telegram.InitBot(&cfg.Tg, tgHandlers)

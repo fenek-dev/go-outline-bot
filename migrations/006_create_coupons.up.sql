@@ -2,8 +2,8 @@ CREATE TABLE IF NOT EXISTS coupons
 (
     id             BIGSERIAL PRIMARY KEY,
     owner_id       BIGINT    NOT NULL,
-    receiver_id    BIGINT,
-    transaction_id UUID,
+    receiver_id    BIGINT    NOT NULL,
+    transaction_id UUID      NOT NULL,
     amount         INTEGER   NOT NULL,
     code           TEXT      NOT NULL,
     status         TEXT      NOT NULL,
