@@ -5,9 +5,9 @@ import "time"
 type SubscriptionStatus string
 
 const (
-	SubscriptionStatusActive   SubscriptionStatus = "active"
-	SubscriptionStatusExpired  SubscriptionStatus = "expired"
-	SubscriptionStatusCanceled SubscriptionStatus = "canceled"
+	SubscriptionStatusActive           SubscriptionStatus = "active"
+	SubscriptionStatusExpired          SubscriptionStatus = "expired"
+	SubscriptionStatusBandwidthReached SubscriptionStatus = "bandwidth_reached"
 )
 
 type Subscription struct {

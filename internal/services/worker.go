@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/fenek-dev/go-outline-bot/internal/models"
 )
 
 func (s *Service) CheckExpireSubscriptions(ctx context.Context) (err error) {
@@ -20,7 +22,7 @@ func (s *Service) CheckExpireSubscriptions(ctx context.Context) (err error) {
 		subscriptionIDs = append(subscriptionIDs, subscription.ID)
 	}
 
-	s.storage.UpdateSubscriptionsStatus(ctx, subscriptionIDs, "expired")
+	s.storage.UpdateSubscriptionsStatus(ctx, subscriptionIDs, models.SubscriptionStatusExpired)
 
 	// Notify users about expired subscription
 	for _, subscription := range subscriptions {
@@ -39,6 +41,14 @@ func (s *Service) CheckBandwidthLimits(ctx context.Context) (err error) {
 		s.log.Error(fmt.Sprintf("GetSubscriptionsByBandwidthReached: %v", err))
 		return err
 	}
+
+	// Diactivate subscriptions
+	subscriptionIDs := make([]uint64, 0, len(subscriptions))
+	for _, subscription := range subscriptions {
+		subscriptionIDs = append(subscriptionIDs, subscription.ID)
+	}
+
+	s.storage.UpdateSubscriptionsStatus(ctx, subscriptionIDs, models.SubscriptionStatusBandwidthReached)
 
 	// Notify users about bandwidth reached
 	for _, subscription := range subscriptions {

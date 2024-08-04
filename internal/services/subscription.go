@@ -165,8 +165,6 @@ func (s *Service) ProlongSubscription(ctx context.Context, subscription models.S
 			return err
 		}
 
-		
-
 		return nil
 	}, nil)
 
