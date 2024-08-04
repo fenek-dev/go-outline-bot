@@ -23,7 +23,7 @@ CONSTRAINT fk_tariff_id FOREIGN KEY (tariff_id) REFERENCES tariffs (id)
 
 CREATE INDEX IF NOT EXISTS user_id_idx ON subscriptions (user_id);
 
-CREATE INDEX IF NOT EXISTS server_id_key_id_idx ON subscriptions (server_id, key_id);
+CREATE INDEX IF NOT EXISTS server_id_key_id_idx ON subscriptions (server_id, key_uuid);
 
 CREATE TRIGGER update_subscriptions_updated_at BEFORE
 UPDATE ON public.subscriptions FOR EACH ROW
