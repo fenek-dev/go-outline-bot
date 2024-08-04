@@ -23,16 +23,6 @@ func (p *Postgres) UserBonusUsedTx(ctx context.Context, tx Executor, userID uint
 	panic("implement me")
 }
 
-func (p *Postgres) IncBalanceTx(ctx context.Context, tx Executor, userID uint64, amount uint32) (err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (p *Postgres) DecBalanceTx(ctx context.Context, tx Executor, userID uint64, amount uint32) (err error) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (p *Postgres) GetTransaction(ctx context.Context, transactionID uint64) (transaction models.Transaction, err error) {
 	//TODO implement me
 	panic("implement me")
