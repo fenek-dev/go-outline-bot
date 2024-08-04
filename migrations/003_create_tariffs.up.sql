@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS tariffs
     CONSTRAINT fk_server_id FOREIGN KEY (server_id) REFERENCES servers (id)
 );
 
-CREATE TRIGGER update_tariffs_updated_at BEFORE
-UPDATE ON public.tariffs FOR EACH ROW
-EXECUTE FUNCTION update_updated_at_column ();
+CREATE TRIGGER update_tariffs_updated_at
+    BEFORE
+        UPDATE
+    ON public.tariffs
+    FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
