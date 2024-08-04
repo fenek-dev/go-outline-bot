@@ -71,7 +71,7 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 		}
 
 		return err
-	})
+	}, nil)
 
 	return subscription, txErr
 }
@@ -103,7 +103,7 @@ func (s *Service) ExpireSubscription(ctx context.Context, subscription models.Su
 		}
 
 		return nil
-	})
+	}, nil)
 
 	// TODO: Send notification to user
 
@@ -149,7 +149,7 @@ func (s *Service) ProlongSubscription(ctx context.Context, subscription models.S
 		}
 
 		return nil
-	})
+	}, nil)
 
 	// TODO: Send notification to user
 
