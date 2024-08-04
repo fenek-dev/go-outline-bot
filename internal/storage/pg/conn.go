@@ -3,7 +3,9 @@ package pg
 import (
 	"context"
 	"fmt"
+	"github.com/fenek-dev/go-outline-bot/internal/models"
 	"log/slog"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -14,6 +16,56 @@ type Postgres struct {
 	conn *pgxpool.Pool
 
 	log *slog.Logger
+}
+
+func (p *Postgres) UserBonusUsedTx(ctx context.Context, tx Executor, userID uint64) (err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p *Postgres) GetTransaction(ctx context.Context, transactionID uint64) (transaction models.Transaction, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p *Postgres) GetTransactions(ctx context.Context, userID uint64) (transactions []models.Transaction, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p *Postgres) UpdateTransactionStatusTx(ctx context.Context, tx Executor, transactionID uint64, status models.TransactionStatus) (err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (p *Postgres) GetUser(ctx context.Context, userID uint64) (user models.User, err error) {
+	//TODO implement me
+	return user, err
+}
+
+func (p *Postgres) CreateTransaction(ctx context.Context, transaction *models.Transaction) (err error) {
+	//TODO implement me
+	return err
+}
+
+func (p *Postgres) CreateTransactionTx(ctx context.Context, tx Executor, transaction *models.Transaction) (err error) {
+	//TODO implement me
+	return err
+}
+
+func (p *Postgres) GetSubscriptions(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error) {
+	//TODO implement me
+	return subscriptions, err
+}
+
+func (p *Postgres) UpdateSubscriptionStatusTx(ctx context.Context, tx Executor, subscriptionID uint64, status models.SubscriptionStatus) (err error) {
+	//TODO implement me
+	return err
+}
+
+func (p *Postgres) ProlongSubscriptionTx(ctx context.Context, tx Executor, subscriptionID uint64, expiredAt time.Time) (err error) {
+	//TODO implement me
+	return err
 }
 
 func New(ctx context.Context, DBUrl string, opts ...Option) *Postgres {

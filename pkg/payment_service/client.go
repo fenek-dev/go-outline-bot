@@ -74,7 +74,7 @@ func (c *Client) Send(req *http.Request, v interface{}) error {
 		req.Header.Set("Content-type", "application/json")
 	}
 
-	resp, err = c.HTTPClient.Do(req)
+	resp, err = c.httpClient.Do(req)
 
 	if err != nil {
 		return err
@@ -119,5 +119,5 @@ func (c *Client) NewRequest(ctx context.Context, method, url string, payload int
 		}
 		buf = bytes.NewBuffer(b)
 	}
-	return http.NewRequestWithContext(ctx, method, c.Options.BaseUrl+"/"+url, buf)
+	return http.NewRequestWithContext(ctx, method, c.BaseUrl+"/"+url, buf)
 }

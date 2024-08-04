@@ -1,16 +1,10 @@
 package markup
 
 func Init() {
-
+	// --- Menu ---
 	Menu.Reply(
-		Menu.Row(
-			InfoOpenBtn,
-		),
-	)
-
-	Info.Inline(
-		Info.Row(ClientListOpenBtn),
-		Info.Row(InfoClose),
+		Menu.Row(KeysOpenBtn, BalanceOpenBtn),
+		Menu.Row(ClientListOpenBtn, InviteOpenBtn),
 	)
 
 	ClientList.Inline(
@@ -18,7 +12,7 @@ func Init() {
 		ClientList.Row(ClientListAndroid),
 		ClientList.Row(ClientListWindows),
 		ClientList.Row(ClientListMacOS),
-		ClientList.Row(ClientListBack),
+		ClientList.Row(CloseBtn),
 	)
 
 	IOSList.Inline(
@@ -46,5 +40,29 @@ func Init() {
 	MacOSList.Inline(
 		MacOSList.Row(MacOSList.URL("Hiddify-next (github)", "https://github.com/hiddify/hiddify-next/releases")),
 		MacOSList.Row(MacOSListBackBtn),
+	)
+
+	//--- Keys ---
+	KeysMenu.Inline(
+		KeysMenu.Row(KeysGetNewBtn),
+		KeysMenu.Row(CloseBtn),
+	)
+
+	//--- Tariffs ---
+	TariffsMenu.Inline(
+		TariffsMenu.Row(TariffsBackBtn),
+	)
+
+	TariffInfo.Inline(
+		TariffInfo.Row(TariffBuyBtn),
+		TariffInfo.Row(CloseBtn),
+	)
+
+	//--- Balance ---
+
+	Balance.Inline(
+		Balance.Row(BalanceRecharge),
+		Balance.Row(BalanceHistory),
+		Balance.Row(CloseBtn),
 	)
 }

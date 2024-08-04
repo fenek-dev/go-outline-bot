@@ -4,6 +4,7 @@ go 1.22.3
 
 require (
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869
+	github.com/georgysavva/scany/v2 v2.1.3
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.1.2
 	github.com/ilyakaznacheev/cleanenv v1.5.0
@@ -11,6 +12,7 @@ require (
 	github.com/samber/lo v1.46.0
 	github.com/stretchr/testify v1.9.0
 	github.com/valyala/fasthttp v1.55.0
+	golang.org/x/net v0.26.0
 	gopkg.in/telebot.v3 v3.3.6
 )
 
@@ -50,7 +52,6 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	golang.org/x/arch v0.8.0 // indirect
 	golang.org/x/crypto v0.25.0 // indirect
-	golang.org/x/net v0.26.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.22.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
