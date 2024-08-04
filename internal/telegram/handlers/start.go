@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/fenek-dev/go-outline-bot/internal/markup"
 	"github.com/fenek-dev/go-outline-bot/internal/storage"
+	"github.com/fenek-dev/go-outline-bot/internal/telegram/markup"
 	"gopkg.in/telebot.v3"
 	"time"
 )
@@ -25,4 +25,8 @@ func (h *Handlers) Start(c telebot.Context) (err error) {
 	}
 
 	return c.Send("Welcome to the club, buddy", markup.Menu)
+}
+
+func (h *Handlers) Close(c telebot.Context) error {
+	return c.Delete()
 }

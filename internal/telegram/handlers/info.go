@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/fenek-dev/go-outline-bot/internal/markup"
+	"github.com/fenek-dev/go-outline-bot/internal/telegram/markup"
 	"gopkg.in/telebot.v3"
 )
 
@@ -13,19 +13,16 @@ func AvailableClients(platform string) string {
 	return "Список доступных клиентов под " + platform + ":"
 }
 
-func (h *Handlers) OpenInfo(c telebot.Context) error {
-	return c.Send("Разделы информации:", markup.Info)
-}
 func (h *Handlers) CloseInfo(c telebot.Context) error {
 	return c.Delete()
 }
 
 func (h *Handlers) OpenClientsList(c telebot.Context) error {
-	return c.Edit(SelectAPlatform, markup.ClientList)
+	return c.Send(SelectAPlatform, markup.ClientList)
 }
 
-func (h *Handlers) BackClientsList(c telebot.Context) error {
-	return c.Edit("Разделы информации:", markup.Info)
+func (h *Handlers) CloseClientsList(c telebot.Context) error {
+	return c.Delete()
 }
 
 func (h *Handlers) ClientsListIOS(c telebot.Context) error {
