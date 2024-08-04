@@ -50,6 +50,13 @@ type CreateTransactionResponse struct {
 //	CreatedAt time.Time `json:"created_at"`
 //}
 
+type TransactionMethodType string
+
+const (
+	TransactionMethodTypePayment    TransactionMethodType = "payment"
+	TransactionMethodTypeWithdrawal TransactionMethodType = "withdrawal"
+)
+
 type TransactionCustomer struct {
 	ID    string `json:"id"`
 	Email string `json:"email"`
@@ -60,20 +67,21 @@ type TransactionItem struct {
 	ID       string  `json:"id"`
 	Name     string  `json:"name"`
 	Type     string  `json:"type"`
-	Price    int     `json:"price"`
-	Quantity int     `json:"quantity"`
+	Price    uint32  `json:"price"`
+	Quantity uint32  `json:"quantity"`
 	SKU      *string `json:"sku"`
 }
 
 type CreateTransactionRequest struct {
 	TxUUID       string `json:"tx_uuid"`
-	Amount       int    `json:"amount"`
+	Amount       uint32 `json:"amount"`
 	UserID       string `json:"user_id"`
-	MethodID     int    `json:"method_id"`
-	MethodType   string `json:"method_type"`
 	CurrencyCode string `json:"currency_code"`
 	Description  string `json:"description"` // Описание транзакции
-	Service      string `json:"service"`     // Название сервис
+	Service      string `json:"service"`     // Название сервиса
+
+	MethodID   int                   `json:"method_id"`
+	MethodType TransactionMethodType `json:"method_type"`
 
 	PostbackURL string `json:"postback_url"`
 	SuccessURL  string `json:"success_url"`
@@ -84,7 +92,7 @@ type CreateTransactionRequest struct {
 	Items []TransactionItem `json:"items"`
 }
 
-func (c *Client) CreateTransaction(ctx context.Context, userId int64, payload CreateTransactionRequest) (*CreateTransactionResponse, error) {
+func (c *Client) CreateTransaction(ctx context.Context, userId uint64, payload CreateTransactionRequest) (*CreateTransactionResponse, error) {
 	response := &CreateTransactionResponse{}
 
 	req, err := c.NewRequest(ctx, http.MethodPost, "v1/transactions", payload)

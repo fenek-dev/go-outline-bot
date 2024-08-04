@@ -21,9 +21,6 @@ type TransactionResultError struct {
 type TransactionResultType string
 
 const (
-	ResultTypeSuccess  TransactionResultType = "success"
 	ResultTypeRedirect TransactionResultType = "redirect"
 	ResultTypeMessage  TransactionResultType = "message"
-	ResultTypeFail     TransactionResultType = "fail"
-	ResultTypeCancel   TransactionResultType = "cancel"
 )
