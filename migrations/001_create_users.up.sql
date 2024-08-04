@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS users
     username   TEXT,
     balance    INTEGER   NOT NULL DEFAULT 0,
     phone      TEXT,
+    partner_id BIGINT,
+    bonus_used BOOLEAN   NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT valid_balance CHECK (balance >= 0)

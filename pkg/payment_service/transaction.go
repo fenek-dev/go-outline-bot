@@ -7,12 +7,22 @@ import (
 	"time"
 )
 
+type TransactionStatus string
+
+const (
+	TransactionStatusAuthorized TransactionStatus = "authorized"
+	TransactionStatusPending    TransactionStatus = "pending"
+	TransactionStatusCompleted  TransactionStatus = "completed"
+	TransactionStatusDeclined   TransactionStatus = "declined"
+	TransactionStatusCancelled  TransactionStatus = "cancelled"
+)
+
 type CreateTransactionResponse struct {
 	ID         int                   `json:"id"`
 	UUID       string                `json:"uuid"`
 	Amount     int                   `json:"amount"`
 	MethodType *string               `json:"method_type"`
-	Status     string                `json:"status"`
+	Status     TransactionStatus     `json:"status"`
 	Error      *string               `json:"error"`
 	Success    bool                  `json:"success"`
 	Action     TransactionResultData `json:"action"`

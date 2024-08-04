@@ -23,7 +23,9 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 		return subscription, err
 	}
 
-	if (user.Balance - tariff.Price) < 0 {
+	price, discountPercent := s.GetTariffPrice(ctx, tariff, user)
+
+	if (user.Balance - price) < 0 {
 		return nil, ErrNotEnoughBalance
 	}
 
@@ -39,7 +41,7 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 		UserID:       user.ID,
 		ServerID:     tariff.ServerID,
 		TariffID:     tariff.ID,
-		InitialPrice: tariff.Price,
+		InitialPrice: price,
 		KeyUUID:      key.ID,
 		AccessUrl:    "",
 		ExpiredAt:    utils.CalcExpiredAt(tariff.Duration),
@@ -50,7 +52,9 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 		err = s.storage.CreateSubscriptionTx(ctx, tx, subscription)
 
 		meta, err := json.Marshal(models.TransactionMeta{
-			SubscriptionID: &subscription.ID,
+			IsDiscounted:    lo.ToPtr(discountPercent > 0),
+			SubscriptionID:  &subscription.ID,
+			DiscountPercent: &discountPercent,
 		})
 
 		if err != nil {
@@ -59,16 +63,22 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 
 		err = s.storage.CreateTransactionTx(ctx, tx, &models.Transaction{
 			UserID: user.ID,
-			Amount: tariff.Price,
+			Amount: price,
 			Type:   models.TransactionTypeDeposit,
 			Status: models.TransactionStatusSuccess,
 			Meta:   string(meta),
 		})
 
-		err = s.storage.DecBalanceTx(ctx, tx, user.ID, uint64(tariff.Price))
 		if err != nil {
 			return err
 		}
+
+		err = s.storage.DecBalanceTx(ctx, tx, user.ID, price)
+		if err != nil {
+			return err
+		}
+
+		err = s.storage.UserBonusUsedTx(ctx, tx, user.ID)
 
 		return err
 	}, nil)
@@ -138,7 +148,7 @@ func (s *Service) ProlongSubscription(ctx context.Context, subscription models.S
 			Meta:   string(meta),
 		})
 
-		err = s.storage.IncBalanceTx(ctx, tx, subscription.UserID, uint64(subscription.InitialPrice))
+		err = s.storage.IncBalanceTx(ctx, tx, subscription.UserID, subscription.InitialPrice)
 		if err != nil {
 			return err
 		}
@@ -164,4 +174,16 @@ func (s *Service) NotifySubscriptionProlongation(ctx context.Context, subscripti
 func (s *Service) NotifySubscriptionBandwidthLimit(ctx context.Context, subscription models.Subscription, totalBytes uint64) (err error) {
 	// TODO: Send notification to user
 	return nil
+}
+
+func (s *Service) GetTariffPrice(ctx context.Context, tariff models.Tariff, user models.User) (price uint32, discountPercent uint8) {
+	if user.PartnerID != nil && !user.BonusUsed {
+		discountPercent := uint32(10) // @TODO: To config PARTNER_DISCOUNT_PERCENT
+		price := tariff.Price - (tariff.Price * discountPercent / 100)
+		price = tariff.Price - (tariff.Price % 10) // round to 10
+
+		return price, uint8(discountPercent)
+	}
+
+	return tariff.Price, 0
 }
