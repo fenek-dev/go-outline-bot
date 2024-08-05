@@ -135,10 +135,11 @@ func (p *Postgres) UpdateSubscriptionsBandwidthByKeyID(ctx context.Context, serv
 
 	_, err = p.conn.Exec(
 		ctx,
-		`UPDATE subscriptions 
+		`UPDATE subscriptions s
 		SET bandwidth_spent=tmp.spent 
-		FROM (VALUES $1) AS tmp (spent, key) WHERE subscriptions.key_uuid=tmp.key`,
+		FROM (VALUES $1) AS tmp (spent, key) WHERE s.key_uuid=tmp.key AND s.server_id=$2`,
 		result,
+		serverID,
 	)
 
 	return nil
