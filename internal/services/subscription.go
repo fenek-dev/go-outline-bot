@@ -178,11 +178,11 @@ func (s *Service) NotifySubscriptionBandwidthLimit(ctx context.Context, subscrip
 
 func (s *Service) GetTariffPrice(ctx context.Context, tariff models.Tariff, user models.User) (price uint32, discountPercent uint8) {
 	if user.PartnerID != nil && !user.BonusUsed {
-		discountPercent := uint32(10) // @TODO: To config PARTNER_DISCOUNT_PERCENT
-		price := tariff.Price - (tariff.Price * discountPercent / 100)
+		discountPercent := s.config.Partner.DiscountPercent // @TODO: To config PARTNER_DISCOUNT_PERCENT
+		price := tariff.Price - (tariff.Price * uint32(discountPercent) / 100)
 		price = tariff.Price - (tariff.Price % 10) // round to 10
 
-		return price, uint8(discountPercent)
+		return price, discountPercent
 	}
 
 	return tariff.Price, 0

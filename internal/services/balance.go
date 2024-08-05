@@ -47,7 +47,7 @@ func (s *Service) RequestDeposit(ctx context.Context, user models.User, amount u
 	}
 
 	response, err := s.paymentClient.CreateTransaction(ctx, user.ID, payment_service.CreateTransactionRequest{
-		TxUUID:       transaction.ID,
+		TxUUID:       string(transaction.ID),
 		Amount:       transaction.Amount,
 		UserID:       string(user.ID),
 		CurrencyCode: "RUB",
@@ -56,9 +56,9 @@ func (s *Service) RequestDeposit(ctx context.Context, user models.User, amount u
 		MethodID:   1,
 		MethodType: payment_service.TransactionMethodTypePayment,
 
-		PostbackURL: "", // @TODO: Get from config PAYMENT_SERVICE_POSTBACK_URL
-		SuccessURL:  "", // @TODOD: Get from config PAYMENT_SERVICE_SUCCESS_URL
-		FailURL:     "", // @TODOD: Get from config PAYMENT_SERVICE_FAIL_URL
+		PostbackURL: s.config.Payment.PostbackUrl,
+		SuccessURL:  s.config.Payment.SuccessUrl,
+		FailURL:     s.config.Payment.FailUrl,
 
 		Customer: payment_service.TransactionCustomer{
 			ID:    string(user.ID),
@@ -88,18 +88,19 @@ func (s *Service) RequestDeposit(ctx context.Context, user models.User, amount u
 	return *response.Action.RedirectURL, nil
 }
 
-func (s *Service) ConfirmDeposit(ctx context.Context, user models.User, transactionID uint64) (err error) {
-	transaction, err := s.storage.GetTransaction(ctx, transactionID)
+func (s *Service) ConfirmDeposit(ctx context.Context, transactionExternalID string) (err error) {
+	transaction, err := s.storage.GetTransactionByExternalID(ctx, transactionExternalID)
 	if err != nil {
 		return err
 	}
 
-	if transaction.UserID != user.ID {
-		return fmt.Errorf("transaction %s not found", transactionID)
+	if transaction.Status != models.TransactionStatusPending {
+		return fmt.Errorf("transaction %s already confirmed", transaction.ID)
 	}
 
-	if transaction.Status != models.TransactionStatusPending {
-		return fmt.Errorf("transaction %s already confirmed", transactionID)
+	user, err := s.storage.GetUser(ctx, transaction.UserID)
+	if err != nil {
+		return err
 	}
 
 	err = s.storage.WithTx(ctx, "ConfirmDeposit", func(ctx context.Context, tx pg.Executor) error {
@@ -108,7 +109,7 @@ func (s *Service) ConfirmDeposit(ctx context.Context, user models.User, transact
 			return err
 		}
 
-		err = s.storage.UpdateTransactionStatusTx(ctx, tx, transactionID, models.TransactionStatusSuccess)
+		err = s.storage.UpdateTransactionStatusTx(ctx, tx, transaction.ID, models.TransactionStatusSuccess)
 		if err != nil {
 			return err
 		}
@@ -151,7 +152,31 @@ func (s *Service) ConfirmDeposit(ctx context.Context, user models.User, transact
 	return err
 }
 
+func (s *Service) CancelDeposit(ctx context.Context, transactionExternalID string) (err error) {
+	transaction, err := s.storage.GetTransactionByExternalID(ctx, transactionExternalID)
+	if err != nil {
+		return err
+	}
+
+	if transaction.Status != models.TransactionStatusPending {
+		return fmt.Errorf("transaction %s already confirmed", transaction.ID)
+	}
+
+	err = s.storage.WithTx(ctx, "CancelDeposit", func(ctx context.Context, tx pg.Executor) error {
+		err = s.storage.UpdateTransactionStatusTx(ctx, tx, transaction.ID, models.TransactionStatusFailed)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	// @TODO: Send notification to user
+
+	return err
+}
+
 func (s *Service) calcPartnerComission(amount uint32) uint32 {
-	commission := amount / 10
+	commission := amount / uint32(s.config.Partner.CommissionPercent) // @TODO: Get from config PARTNER_COMMISSION_PERCENT
 	return commission - (commission % 10)
 }
