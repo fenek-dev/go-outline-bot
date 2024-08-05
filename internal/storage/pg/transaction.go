@@ -10,8 +10,10 @@ import (
 )
 
 func (p *Postgres) CreateTransactionTx(ctx context.Context, tx Executor, transaction *models.Transaction) (err error) {
-	err = tx.QueryRow(
+	err = pgxscan.Get(
 		ctx,
+		tx,
+		transaction,
 		"INSERT INTO transactions (user_id, amount, type, status, external_id, meta) VALUES ($1, $2, $3, $4) RETURNING id",
 		transaction.UserID,
 		transaction.Amount,
@@ -19,7 +21,7 @@ func (p *Postgres) CreateTransactionTx(ctx context.Context, tx Executor, transac
 		transaction.Status,
 		transaction.ExternalID,
 		transaction.Meta,
-	).Scan(&transaction.ID)
+	)
 
 	if errors.Is(err, pgx.ErrNoRows) {
 		return storage.ErrTransactionNotFound
