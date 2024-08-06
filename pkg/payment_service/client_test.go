@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"log/slog"
 	"net/http"
 	"testing"
@@ -22,11 +21,6 @@ func NewTestLogger(t *testing.T) *slog.Logger {
 	)
 }
 
-func NewTestClient(t *testing.T, httpClient *mocks.HTTPClient) *Client {
-	t.Helper()
-	return NewClient(&Options{}, NewTestLogger(t), httpClient)
-}
-
 type MockBody struct {
 	Param string `json:"value"`
 }
@@ -34,7 +28,7 @@ type MockBody struct {
 func Test_NewRequest(t *testing.T) {
 	t.Run("should create new request", func(t *testing.T) {
 		// Arrange
-		client := NewTestClient(t, mocks.NewHTTPClient(t))
+		client := NewClient("", WithHTTPClient(mocks.NewHTTPClient(t)))
 		ctx := context.Background()
 
 		// Act
@@ -58,10 +52,10 @@ func Test_Send(t *testing.T) {
 		httpClient := mocks.NewHTTPClient(t)
 		httpClient.On("Do", mock.Anything).Return(&http.Response{
 			StatusCode: 200,
-			Body:       ioutil.NopCloser(bytes.NewReader(mockBody)),
+			Body:       io.NopCloser(bytes.NewReader(mockBody)),
 		}, nil)
 
-		client := NewTestClient(t, httpClient)
+		client := NewClient("", WithHTTPClient(httpClient))
 
 		ctx := context.Background()
 		request, err := client.NewRequest(ctx, "GET", "/test", nil)

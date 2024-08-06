@@ -8,6 +8,11 @@ CREATE TABLE IF NOT EXISTS subscriptions
     bandwidth_spent BIGINT    NOT NULL DEFAULT 0,
     key_uuid        UUID      NOT NULL,
     access_url      TEXT      NOT NULL,
+    server_ip       TEXT      NOT NULL,
+    server_port     INTEGER   NOT NULL,
+    password        TEXT      NOT NULL,
+    method          TEXT      NOT NULL,
+    is_trial        BOOLEAN   NOT NULL DEFAULT FALSE,
     auto_prolong    BOOLEAN   NOT NULL DEFAULT FALSE,
     status          TEXT      NOT NULL,
     expired_at      TIMESTAMP NOT NULL,
@@ -23,6 +28,7 @@ CREATE TABLE IF NOT EXISTS subscriptions
 
 CREATE INDEX IF NOT EXISTS user_id_idx ON subscriptions (user_id);
 CREATE INDEX IF NOT EXISTS server_id_key_id_idx ON subscriptions (server_id, key_uuid);
+CREATE INDEX IF NOT EXISTS expired_at_idx ON subscriptions (expired_at);
 
 CREATE TRIGGER update_subscriptions_updated_at
     BEFORE

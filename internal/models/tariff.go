@@ -10,6 +10,7 @@ type Tariff struct {
 	ServerID  uint64    `json:"server_id" db:"server_id"`
 	Active    bool      `json:"active" db:"active"`
 	Duration  uint32    `json:"duration" db:"duration"`
+	IsTrial   bool      `json:"is_trial" db:"is_trial"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }

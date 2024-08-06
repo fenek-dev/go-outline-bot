@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 
 	"github.com/fenek-dev/go-outline-bot/internal/models"
 	"github.com/fenek-dev/go-outline-bot/internal/storage/pg"
@@ -47,7 +48,7 @@ func (s *Service) RequestDeposit(ctx context.Context, user models.User, amount u
 	}
 
 	response, err := s.paymentClient.CreateTransaction(ctx, user.ID, payment_service.CreateTransactionRequest{
-		TxUUID:       transaction.ID,
+		TxUUID:       string(transaction.ID),
 		Amount:       transaction.Amount,
 		UserID:       string(user.ID),
 		CurrencyCode: "RUB",
@@ -56,9 +57,9 @@ func (s *Service) RequestDeposit(ctx context.Context, user models.User, amount u
 		MethodID:   1,
 		MethodType: payment_service.TransactionMethodTypePayment,
 
-		PostbackURL: "", // @TODO: Get from config PAYMENT_SERVICE_POSTBACK_URL
-		SuccessURL:  "", // @TODOD: Get from config PAYMENT_SERVICE_SUCCESS_URL
-		FailURL:     "", // @TODOD: Get from config PAYMENT_SERVICE_FAIL_URL
+		PostbackURL: s.config.Payment.PostbackUrl,
+		SuccessURL:  s.config.Payment.SuccessUrl,
+		FailURL:     s.config.Payment.FailUrl,
 
 		Customer: payment_service.TransactionCustomer{
 			ID:    string(user.ID),
@@ -79,6 +80,7 @@ func (s *Service) RequestDeposit(ctx context.Context, user models.User, amount u
 
 	if err != nil {
 		// TODO: Update transaction status
+		return "", fmt.Errorf("failed to request deposit: %w", err)
 	}
 
 	if response.Action.Type != payment_service.ResultTypeRedirect || response.Action.RedirectURL == nil {
@@ -88,29 +90,31 @@ func (s *Service) RequestDeposit(ctx context.Context, user models.User, amount u
 	return *response.Action.RedirectURL, nil
 }
 
-func (s *Service) ConfirmDeposit(ctx context.Context, user models.User, transactionID uint64) (err error) {
-	transaction, err := s.storage.GetTransaction(ctx, transactionID)
+func (s *Service) ConfirmDeposit(ctx context.Context, transactionExternalID string) (err error) {
+	var partnerTransaction *models.Transaction
+	transaction, err := s.storage.GetTransactionByExternalID(ctx, transactionExternalID)
 	if err != nil {
-		return err
-	}
-
-	if transaction.UserID != user.ID {
-		return fmt.Errorf("transaction %s not found", transactionID)
+		return fmt.Errorf("failed to get transaction by external id: %w", err)
 	}
 
 	if transaction.Status != models.TransactionStatusPending {
-		return fmt.Errorf("transaction %s already confirmed", transactionID)
+		return fmt.Errorf("transaction %d already confirmed", transaction.ID)
+	}
+
+	user, err := s.storage.GetUser(ctx, transaction.UserID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
 	}
 
 	err = s.storage.WithTx(ctx, "ConfirmDeposit", func(ctx context.Context, tx pg.Executor) error {
 		err = s.storage.IncBalanceTx(ctx, tx, user.ID, transaction.Amount)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to increase balance: %w", err)
 		}
 
-		err = s.storage.UpdateTransactionStatusTx(ctx, tx, transactionID, models.TransactionStatusSuccess)
+		err = s.storage.UpdateTransactionStatusTx(ctx, tx, transaction.ID, models.TransactionStatusSuccess)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to update transaction status: %w", err)
 		}
 
 		// @TODO: Send notification to user
@@ -118,11 +122,11 @@ func (s *Service) ConfirmDeposit(ctx context.Context, user models.User, transact
 		// Partner commission
 		// @TODO: Outbox for partner commission
 		if user.PartnerID != nil {
-			commission := s.calcPartnerComission(transaction.Amount)
+			commission := s.CalcPartnerComission(transaction.Amount)
 
 			err = s.storage.IncBalanceTx(ctx, tx, *user.PartnerID, commission)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to increase partner balance: %w", err)
 			}
 
 			meta, err := json.Marshal(models.TransactionMeta{
@@ -131,27 +135,70 @@ func (s *Service) ConfirmDeposit(ctx context.Context, user models.User, transact
 			})
 
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to marshal meta: %w", err)
 			}
 
-			err = s.storage.CreateTransactionTx(ctx, tx, &models.Transaction{
+			partnerTransaction := &models.Transaction{
 				UserID: *user.PartnerID,
 				Amount: commission,
 				Type:   models.TransactionTypeDeposit,
 				Status: models.TransactionStatusSuccess,
 				Meta:   string(meta),
-			})
+			}
 
-			// @TODO: Send notification to partner
+			err = s.storage.CreateTransactionTx(ctx, tx, partnerTransaction)
+
+			if err != nil {
+				return fmt.Errorf("failed to create partner transaction: %w", err)
+			}
 		}
 
 		return nil
 	}, nil)
 
+	if err != nil {
+		return fmt.Errorf("failed to confirm deposit: %w", err)
+	}
+
+	if user.PartnerID != nil && partnerTransaction != nil {
+		// @TODO: To outbox
+		s.NotifyPartnerAboutDeposit(ctx, *partnerTransaction)
+	}
+
 	return err
 }
 
-func (s *Service) calcPartnerComission(amount uint32) uint32 {
-	commission := amount / 10
-	return commission - (commission % 10)
+func (s *Service) CancelDeposit(ctx context.Context, transactionExternalID string) (err error) {
+	transaction, err := s.storage.GetTransactionByExternalID(ctx, transactionExternalID)
+	if err != nil {
+		return fmt.Errorf("failed to get transaction by external id: %w", err)
+	}
+
+	if transaction.Status != models.TransactionStatusPending {
+		return fmt.Errorf("transaction %d already confirmed", transaction.ID)
+	}
+
+	err = s.storage.WithTx(ctx, "CancelDeposit", func(ctx context.Context, tx pg.Executor) error {
+		err = s.storage.UpdateTransactionStatusTx(ctx, tx, transaction.ID, models.TransactionStatusFailed)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}, nil)
+
+	// @TODO: Send notification to user
+
+	return err
+}
+
+func (s *Service) CalcPartnerComission(amount uint32) uint32 {
+	commissionPercent := s.config.Partner.CommissionPercent
+	if commissionPercent == 0 {
+		return 0
+	}
+
+	commission := math.Floor(float64(amount) * float64(commissionPercent) / 100)
+
+	return uint32(commission)
 }
