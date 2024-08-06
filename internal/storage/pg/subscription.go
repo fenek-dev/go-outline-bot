@@ -75,3 +75,19 @@ func (p *Postgres) ProlongSubscriptionTx(ctx context.Context, tx Executor, subsc
 
 	return err
 }
+
+func (p *Postgres) ToggleAutoProlong(ctx context.Context, subscriptionID uint64) (auto bool, err error) {
+	err = pgxscan.Get(
+		ctx,
+		p.conn,
+		&auto,
+		"UPDATE subscriptions SET auto_prolong = NOT auto_prolong WHERE id = $1 RETURNING auto_prolong",
+		subscriptionID,
+	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, storage.ErrSubscriptionNotFound
+	}
+
+	return auto, err
+}

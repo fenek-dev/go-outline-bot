@@ -39,6 +39,7 @@ type Storage interface {
 	CreateSubscriptionTx(ctx context.Context, tx pg.Executor, subscription *models.Subscription) (err error)
 	UpdateSubscriptionStatusTx(ctx context.Context, tx pg.Executor, subscriptionID uint64, status models.SubscriptionStatus) (err error)
 	ProlongSubscriptionTx(ctx context.Context, tx pg.Executor, subscriptionID uint64, expiredAt time.Time) (err error)
+	ToggleAutoProlong(ctx context.Context, subscriptionID uint64) (auto bool, err error)
 
 	GetServer(ctx context.Context, serverID uint64) (server models.Server, err error)
 	GetAllServers(ctx context.Context) (servers []models.Server, err error)

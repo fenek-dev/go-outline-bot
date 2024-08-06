@@ -186,3 +186,7 @@ func (s *Service) GetTariffPrice(ctx context.Context, tariff models.Tariff, user
 
 	return tariff.Price, 0
 }
+
+func (s *Service) ToggleAutoProlong(ctx context.Context, subscriptionID uint64) (auto bool, err error) {
+	return s.storage.ToggleAutoProlong(ctx, subscriptionID)
+}

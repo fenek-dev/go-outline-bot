@@ -9,5 +9,6 @@ var (
 	KeysGetNewBtn = KeysMenu.Data("🔑Новый ключ", "KeysGetNew")
 	KeyItem       = KeysMenu.Data("REPLACE", "KeyItem")
 
-	KeyInfo = &t.ReplyMarkup{}
+	KeyInfo           = &t.ReplyMarkup{}
+	KeyAutoProlongBtn = KeyInfo.Data("🔄Автопродление", "KeyInfoEnableProlong")
 )

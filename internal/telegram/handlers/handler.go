@@ -24,6 +24,7 @@ type Service interface {
 	GetSubscription(ctx context.Context, id uint64) (subscription models.Subscription, err error)
 	GetSubscriptionsByUser(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error)
 	CreateSubscription(ctx context.Context, user models.User, tariff models.Tariff) (subscription *models.Subscription, err error)
+	ToggleAutoProlong(ctx context.Context, subscriptionID uint64) (auto bool, err error)
 }
 
 type Handlers struct {

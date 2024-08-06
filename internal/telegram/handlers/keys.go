@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fenek-dev/go-outline-bot/internal/storage"
-	"github.com/fenek-dev/go-outline-bot/internal/telegram/markup"
+	m "github.com/fenek-dev/go-outline-bot/internal/telegram/markup"
 	"gopkg.in/telebot.v3"
 	"math"
 	"strconv"
@@ -22,11 +22,11 @@ func (h *Handlers) OpenKeysMenu(c telebot.Context) error {
 
 	if err != nil {
 		h.log.Error("Can not get subs", "error", err)
-		return c.Send("Произошла ошибка. Попробуйте еще раз", markup.OnlyClose)
+		return c.Send("Произошла ошибка. Попробуйте еще раз", m.OnlyClose)
 	}
 
 	rows := make([]telebot.Row, 0, len(subs)+2)
-	rows = append(rows, markup.KeysMenu.Row(markup.KeysGetNewBtn))
+	rows = append(rows, m.KeysMenu.Row(m.KeysGetNewBtn))
 
 	for _, sub := range subs {
 		if time.Now().After(sub.ExpiredAt) {
@@ -36,19 +36,19 @@ func (h *Handlers) OpenKeysMenu(c telebot.Context) error {
 		btn := telebot.Btn{
 			Text:   fmt.Sprintf("%d, (%vд)", sub.ID, math.Trunc(sub.ExpiredAt.Sub(time.Now()).Hours()/24)),
 			Data:   strconv.FormatUint(sub.ID, 10),
-			Unique: markup.KeyItem.Unique,
+			Unique: m.KeyItem.Unique,
 		}
 
-		rows = append(rows, markup.KeysMenu.Row(btn))
+		rows = append(rows, m.KeysMenu.Row(btn))
 	}
 
-	rows = append(rows, markup.KeysMenu.Row(markup.CloseBtn))
+	rows = append(rows, m.KeysMenu.Row(m.CloseBtn))
 
-	markup.KeysMenu.Inline(
+	m.KeysMenu.Inline(
 		rows...,
 	)
 
-	return c.Send("Ключи:", markup.KeysMenu)
+	return c.Send("Ключи:", m.KeysMenu)
 }
 
 func (h *Handlers) CloseKeysMenu(c telebot.Context) error {
@@ -59,9 +59,9 @@ func (h *Handlers) OpenKeyInfo(c telebot.Context) error {
 	ctx, cancel := context.WithTimeout(context.Background(), h.timeout)
 	defer cancel()
 
-	keyID := c.Data()
+	subID := c.Data()
 
-	id, err := strconv.ParseUint(keyID, 10, 64)
+	id, err := strconv.ParseUint(subID, 10, 64)
 	if err != nil {
 		return err
 	}
@@ -70,10 +70,20 @@ func (h *Handlers) OpenKeyInfo(c telebot.Context) error {
 	if err != nil {
 		h.log.Error("Can not get sub", "error", err)
 		if errors.Is(err, storage.ErrSubscriptionNotFound) {
-			return c.Send("Ключ не найдена", markup.OnlyClose)
+			return c.Send("Ключ не найдена", m.OnlyClose)
 		}
-		return c.Send("Произошла ошибка. Попробуйте еще раз", markup.OnlyClose)
+		return c.Send("Произошла ошибка. Попробуйте еще раз", m.OnlyClose)
 	}
 
-	return c.Send(fmt.Sprintf("Ключ %d, действителен до %v", sub.ID, sub.ExpiredAt), markup.OnlyClose)
+	text := "✅Включить Автопродление"
+	if sub.AutoProlong {
+		text = "❌Выключить Автопродление"
+	}
+
+	m.KeyInfo.Inline(
+		m.KeyInfo.Row(m.WithText(text, m.WithData(subID, m.KeyAutoProlongBtn))),
+		m.KeyInfo.Row(m.CloseBtn),
+	)
+
+	return c.Send(fmt.Sprintf("Ключ %d, действителен до %v", sub.ID, sub.ExpiredAt), m.KeyInfo)
 }
