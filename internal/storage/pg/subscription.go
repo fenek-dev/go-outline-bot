@@ -13,11 +13,10 @@ import (
 func (p *Postgres) CreateSubscription(ctx context.Context, subscription *models.Subscription) (err error) {
 	return p.CreateSubscriptionTx(ctx, p.conn, subscription)
 }
-
 func (p *Postgres) CreateSubscriptionTx(ctx context.Context, tx Executor, subscription *models.Subscription) (err error) {
 	err = tx.QueryRow(
 		ctx,
-		"INSERT INTO subscriptions (user_id, server_id, tariff_id, initial_price, key_uuid, accessurl, status, expired_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
+		"INSERT INTO subscriptions (user_id, server_id, tariff_id, initial_price, key_uuid, access_url, status, expired_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
 		subscription.UserID,
 		subscription.ServerID,
 		subscription.TariffID,

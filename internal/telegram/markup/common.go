@@ -7,4 +7,11 @@ var (
 		Unique: "Close",
 		Text:   "❌ Закрыть",
 	}
+
+	OnlyClose = &t.ReplyMarkup{}
 )
+
+func WithData(data string, btn t.Btn) t.Btn {
+	btn.Data = data
+	return btn
+}

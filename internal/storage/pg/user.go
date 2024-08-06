@@ -38,7 +38,7 @@ func (p *Postgres) GetUser(ctx context.Context, userID uint64) (user models.User
 }
 
 func (p *Postgres) SetUserBonusUsedTx(ctx context.Context, tx Executor, userID uint64) (err error) {
-	_, err = p.conn.Exec(ctx, "UPDATE users SET bonus_used = true WHERE id = $1", userID)
+	_, err = tx.Exec(ctx, "UPDATE users SET bonus_used = true WHERE id = $1", userID)
 
 	if errors.Is(err, pgx.ErrNoRows) {
 		return storage.ErrUserNotFound

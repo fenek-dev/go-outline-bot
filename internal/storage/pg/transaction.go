@@ -12,7 +12,7 @@ import (
 func (p *Postgres) CreateTransactionTx(ctx context.Context, tx Executor, transaction *models.Transaction) (err error) {
 	err = tx.QueryRow(
 		ctx,
-		"INSERT INTO transactions (user_id, amount, type, status, external_id, meta) VALUES ($1, $2, $3, $4) RETURNING id",
+		"INSERT INTO transactions (user_id, amount, type, status, external_id, meta) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
 		transaction.UserID,
 		transaction.Amount,
 		transaction.Type,

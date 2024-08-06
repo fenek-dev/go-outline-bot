@@ -1,6 +1,11 @@
 package markup
 
 func Init() {
+
+	OnlyClose.Inline(
+		OnlyClose.Row(CloseBtn),
+	)
+
 	// --- Menu ---
 	Menu.Reply(
 		Menu.Row(KeysOpenBtn, BalanceOpenBtn),
@@ -42,20 +47,9 @@ func Init() {
 		MacOSList.Row(MacOSListBackBtn),
 	)
 
-	//--- Keys ---
-	KeysMenu.Inline(
-		KeysMenu.Row(KeysGetNewBtn),
-		KeysMenu.Row(CloseBtn),
-	)
-
 	//--- Tariffs ---
 	TariffsMenu.Inline(
 		TariffsMenu.Row(TariffsBackBtn),
-	)
-
-	TariffInfo.Inline(
-		TariffInfo.Row(TariffBuyBtn),
-		TariffInfo.Row(CloseBtn),
 	)
 
 	//--- Balance ---

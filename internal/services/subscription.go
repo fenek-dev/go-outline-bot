@@ -17,12 +17,7 @@ var (
 	ErrNotEnoughBalance SubscriptionError = errors.New("not enough balance")
 )
 
-func (s *Service) CreateSubscription(ctx context.Context, user models.User, tariffID uint64) (subscription *models.Subscription, err error) {
-	tariff, err := s.storage.GetTariff(ctx, tariffID)
-	if err != nil {
-		return subscription, err
-	}
-
+func (s *Service) CreateSubscription(ctx context.Context, user models.User, tariff models.Tariff) (subscription *models.Subscription, err error) {
 	price, discountPercent := s.GetTariffPrice(ctx, tariff, user)
 
 	if (user.Balance - price) < 0 {
@@ -43,7 +38,7 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 		TariffID:     tariff.ID,
 		InitialPrice: price,
 		KeyUUID:      key.ID,
-		AccessUrl:    "",
+		AccessUrl:    key.AccessURL,
 		ExpiredAt:    utils.CalcExpiredAt(tariff.Duration),
 		Status:       "pending",
 	}
@@ -86,8 +81,8 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 	return subscription, txErr
 }
 
-func (s *Service) GetSubscriptions(ctx context.Context, user models.User) (subscriptions []models.Subscription, err error) {
-	return s.storage.GetSubscriptionsByUser(ctx, user.ID)
+func (s *Service) GetSubscriptions(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error) {
+	return s.storage.GetSubscriptionsByUser(ctx, userID)
 }
 
 // TODO: EnableAutoProlongation

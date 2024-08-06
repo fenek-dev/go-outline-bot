@@ -14,11 +14,15 @@ type Service interface {
 	CreateUser(ctx context.Context, user *telebot.User) (err error)
 
 	GetBalance(ctx context.Context, userId uint64) (balance uint32, err error)
+	GetUser(ctx context.Context, userID uint64) (user models.User, err error)
 
 	GetAllServers(ctx context.Context) (servers []models.Server, err error)
 
 	GetTariff(ctx context.Context, tariffId uint64) (tariff models.Tariff, err error)
 	GetTariffsByServer(ctx context.Context, serverId uint64) (tariffs []models.Tariff, err error)
+
+	CreateSubscription(ctx context.Context, user models.User, tariff models.Tariff) (subscription *models.Subscription, err error)
+	GetSubscriptions(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error)
 }
 
 type Handlers struct {
@@ -32,6 +36,7 @@ func New(service Service, opts ...Option) *Handlers {
 	defaultHandlers := &Handlers{
 		service: service,
 		timeout: time.Second * 10,
+		log:     slog.Default(),
 	}
 
 	for _, opt := range opts {

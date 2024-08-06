@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS subscriptions
     initial_price   INTEGER   NOT NULL,
     bandwidth_spent BIGINT    NOT NULL DEFAULT 0,
     key_uuid        UUID      NOT NULL,
-    accessUrl       TEXT      NOT NULL,
+    access_url       TEXT      NOT NULL,
     auto_prolong    BOOLEAN   NOT NULL DEFAULT FALSE,
     status          TEXT      NOT NULL,
     expired_at      TIMESTAMP NOT NULL,
@@ -32,4 +32,4 @@ CREATE TRIGGER update_subscriptions_updated_at
 EXECUTE FUNCTION update_updated_at_column();
 
 COMMENT ON COLUMN subscriptions.key_uuid IS 'UUID ключа в outline';
-COMMENT ON COLUMN subscriptions.accessUrl IS 'Ключ подключения к outline';
+COMMENT ON COLUMN subscriptions.access_url IS 'Ключ подключения к outline';
