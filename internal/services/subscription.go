@@ -57,7 +57,11 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 		TariffID:     tariff.ID,
 		InitialPrice: price,
 		KeyUUID:      key.ID,
-		AccessUrl:    "",
+		AccessUrl:    key.AccessURL,
+		ServerIP:     key.Method,
+		ServerPort:   key.Port,
+		Password:     key.Password,
+		Method:       key.Method,
 		ExpiredAt:    utils.CalcExpiredAt(tariff.Duration),
 		Status:       "pending",
 	}
@@ -78,7 +82,7 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 		err = s.storage.CreateTransactionTx(ctx, tx, &models.Transaction{
 			UserID: user.ID,
 			Amount: price,
-			Type:   models.TransactionTypeDeposit,
+			Type:   models.TransactionTypeWithdrawal,
 			Status: models.TransactionStatusSuccess,
 			Meta:   string(meta),
 		})

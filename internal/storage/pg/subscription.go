@@ -148,7 +148,7 @@ func (p *Postgres) UpdateSubscriptionsBandwidthByKeyID(ctx context.Context, serv
 
 func (p *Postgres) TrialSubscriptionExists(ctx context.Context, userID uint64) (has bool, err error) {
 	var count int
-	err = p.conn.QueryRow(ctx, "SELECT COUNT(id) FROM subscriptions as s JOIN tariffs as t ON t.id = s.tariff_id WHERE t.is_trial = true AND s.user_id = $1", userID).Scan(&count)
+	err = p.conn.QueryRow(ctx, "SELECT COUNT(id) FROM subscriptions WHERE is_trial = true AND user_id = $1", userID).Scan(&count)
 	if err != nil {
 		return false, err
 	}
