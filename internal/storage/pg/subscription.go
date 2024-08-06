@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/fenek-dev/go-outline-bot/internal/models"
 	"github.com/fenek-dev/go-outline-bot/internal/storage"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
-	"strings"
-	"time"
 )
 
 func (p *Postgres) CreateSubscription(ctx context.Context, subscription *models.Subscription) (err error) {
@@ -143,4 +144,14 @@ func (p *Postgres) UpdateSubscriptionsBandwidthByKeyID(ctx context.Context, serv
 	)
 
 	return nil
+}
+
+func (p *Postgres) TrialSubscriptionExists(ctx context.Context, userID uint64) (has bool, err error) {
+	var count int
+	err = p.conn.QueryRow(ctx, "SELECT COUNT(id) FROM subscriptions as s JOIN tariffs as t ON t.id = s.tariff_id WHERE t.is_trial = true AND s.user_id = $1", userID).Scan(&count)
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
 }

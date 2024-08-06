@@ -46,6 +46,7 @@ type Storage interface {
 	UpdateSubscriptionStatusTx(ctx context.Context, tx pg.Executor, subscriptionID uint64, status models.SubscriptionStatus) (err error)
 	UpdateSubscriptionsBandwidthByKeyID(ctx context.Context, serverID uint64, metrics map[string]uint64) (err error)
 	ProlongSubscriptionTx(ctx context.Context, tx pg.Executor, subscriptionID uint64, expiredAt time.Time) (err error)
+	TrialSubscriptionExists(ctx context.Context, userID uint64) (has bool, err error)
 
 	GetServer(ctx context.Context, serverID uint64) (server models.Server, err error)
 	GetAllServers(ctx context.Context) (servers []models.Server, err error)

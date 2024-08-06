@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math"
 
 	"github.com/fenek-dev/go-outline-bot/internal/models"
@@ -15,13 +16,25 @@ import (
 type SubscriptionError error
 
 var (
+	ErrAlreadyHasTrial  SubscriptionError = errors.New("already has trial")
 	ErrNotEnoughBalance SubscriptionError = errors.New("not enough balance")
 )
 
 func (s *Service) CreateSubscription(ctx context.Context, user models.User, tariffID uint64) (subscription *models.Subscription, err error) {
 	tariff, err := s.storage.GetTariff(ctx, tariffID)
 	if err != nil {
-		return subscription, err
+		return subscription, fmt.Errorf("get tariff: %w", err)
+	}
+
+	if tariff.IsTrial {
+		hasTrial, err := s.storage.TrialSubscriptionExists(ctx, user.ID)
+		if err != nil {
+			return subscription, fmt.Errorf("has trial subscription: %w", err)
+		}
+
+		if hasTrial {
+			return subscription, ErrAlreadyHasTrial
+		}
 	}
 
 	price, discountPercent := s.CalcTariffPrice(ctx, tariff, user)
@@ -35,7 +48,7 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 
 	key, err := s.CreateKey(ctx, tariff)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("create key: %w", err)
 	}
 
 	subscription = &models.Subscription{
@@ -71,20 +84,28 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 		})
 
 		if err != nil {
-			return err
+			return fmt.Errorf("create transaction: %w", err)
 		}
 
 		err = s.storage.DecBalanceTx(ctx, tx, user.ID, price)
 		if err != nil {
-			return err
+			return fmt.Errorf("dec balance: %w", err)
 		}
 
 		err = s.storage.SetUserBonusUsedTx(ctx, tx, user.ID)
 
-		return err
+		if err != nil {
+			return fmt.Errorf("set user bonus used: %w", err)
+		}
+
+		return nil
 	}, nil)
 
-	return subscription, txErr
+	if txErr != nil {
+		return nil, fmt.Errorf("create subscription tx: %w", txErr)
+	}
+
+	return subscription, nil
 }
 
 func (s *Service) GetSubscriptions(ctx context.Context, user models.User) (subscriptions []models.Subscription, err error) {
@@ -97,38 +118,42 @@ func (s *Service) ExpireSubscription(ctx context.Context, subscription models.Su
 
 	if subscription.AutoProlong {
 		err = s.ProlongSubscription(ctx, subscription)
-		return err
+		return fmt.Errorf("prolong subscription: %w", err)
 	}
 
 	// TODO: to outbox in db transaction
 	err = s.DeactivateKey(ctx, subscription)
 	if err != nil {
-		return err
+		return fmt.Errorf("deactivate key: %w", err)
 	}
 
 	txErr := s.storage.WithTx(ctx, "ExpireSubscription", func(ctx context.Context, tx pg.Executor) error {
 		err = s.storage.UpdateSubscriptionStatusTx(ctx, tx, subscription.ID, "expired")
 		if err != nil {
-			return err
+			return fmt.Errorf("update subscription status: %w", err)
 		}
 
 		return nil
 	}, nil)
 
+	if txErr != nil {
+		return fmt.Errorf("expire subscription tx: %w", txErr)
+	}
+
 	go s.NotifySubscriptionExpired(ctx, subscription)
 
-	return txErr
+	return nil
 }
 
 func (s *Service) ProlongSubscription(ctx context.Context, subscription models.Subscription) (err error) {
 	tariff, err := s.storage.GetTariff(ctx, subscription.TariffID)
 	if err != nil {
-		return err
+		return fmt.Errorf("get tariff: %w", err)
 	}
 
 	user, err := s.storage.GetUser(ctx, subscription.UserID)
 	if err != nil {
-		return err
+		return fmt.Errorf("get user: %w", err)
 	}
 
 	if (user.Balance - tariff.Price) < 0 {
@@ -141,7 +166,7 @@ func (s *Service) ProlongSubscription(ctx context.Context, subscription models.S
 		})
 
 		if err != nil {
-			return err
+			return fmt.Errorf("marshal transaction meta: %w", err)
 		}
 
 		err = s.storage.CreateTransactionTx(ctx, tx, &models.Transaction{
@@ -153,24 +178,24 @@ func (s *Service) ProlongSubscription(ctx context.Context, subscription models.S
 		})
 
 		if err != nil {
-			return err
+			return fmt.Errorf("create transaction: %w", err)
 		}
 
 		err = s.storage.IncBalanceTx(ctx, tx, subscription.UserID, subscription.InitialPrice)
 		if err != nil {
-			return err
+			return fmt.Errorf("inc balance: %w", err)
 		}
 
 		err = s.storage.ProlongSubscriptionTx(ctx, tx, subscription.ID, utils.CalcExpiredAt(tariff.Duration))
 		if err != nil {
-			return err
+			return fmt.Errorf("prolong subscription: %w", err)
 		}
 
 		return nil
 	}, nil)
 
 	if txErr != nil {
-		return txErr
+		return fmt.Errorf("prolong subscription tx: %w", txErr)
 	}
 
 	go s.NotifySubscriptionProlongation(ctx, subscription)
