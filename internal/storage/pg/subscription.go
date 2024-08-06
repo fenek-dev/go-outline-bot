@@ -30,6 +30,18 @@ func (p *Postgres) CreateSubscriptionTx(ctx context.Context, tx Executor, subscr
 	return err
 }
 
+func (p *Postgres) GetSubscription(ctx context.Context, id uint64) (subscription models.Subscription, err error) {
+	err = pgxscan.Get(ctx, p.conn, &subscription, "SELECT * FROM subscriptions WHERE id = $1", id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return subscription, storage.ErrSubscriptionNotFound
+		}
+		return subscription, err
+	}
+
+	return subscription, err
+}
+
 func (p *Postgres) GetSubscriptionsByUser(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error) {
 	rows, err := p.conn.Query(ctx, "SELECT * FROM subscriptions WHERE user_id = $1", userID)
 	if err != nil {

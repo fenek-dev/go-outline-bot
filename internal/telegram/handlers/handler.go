@@ -21,8 +21,9 @@ type Service interface {
 	GetTariff(ctx context.Context, tariffId uint64) (tariff models.Tariff, err error)
 	GetTariffsByServer(ctx context.Context, serverId uint64) (tariffs []models.Tariff, err error)
 
+	GetSubscription(ctx context.Context, id uint64) (subscription models.Subscription, err error)
+	GetSubscriptionsByUser(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error)
 	CreateSubscription(ctx context.Context, user models.User, tariff models.Tariff) (subscription *models.Subscription, err error)
-	GetSubscriptions(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error)
 }
 
 type Handlers struct {

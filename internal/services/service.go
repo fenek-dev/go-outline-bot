@@ -33,6 +33,7 @@ type Storage interface {
 	CreateTransactionTx(ctx context.Context, tx pg.Executor, transaction *models.Transaction) (terr error)
 	UpdateTransactionStatusTx(ctx context.Context, tx pg.Executor, transactionID uint64, status models.TransactionStatus) (err error)
 
+	GetSubscription(ctx context.Context, id uint64) (subscription models.Subscription, err error)
 	GetSubscriptionsByUser(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error)
 	CreateSubscription(ctx context.Context, subscription *models.Subscription) (err error)
 	CreateSubscriptionTx(ctx context.Context, tx pg.Executor, subscription *models.Subscription) (err error)

@@ -81,7 +81,11 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 	return subscription, txErr
 }
 
-func (s *Service) GetSubscriptions(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error) {
+func (s *Service) GetSubscription(ctx context.Context, id uint64) (subscription models.Subscription, err error) {
+	return s.storage.GetSubscription(ctx, id)
+}
+
+func (s *Service) GetSubscriptionsByUser(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error) {
 	return s.storage.GetSubscriptionsByUser(ctx, userID)
 }
 

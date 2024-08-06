@@ -7,4 +7,7 @@ import (
 var (
 	KeysMenu      = &t.ReplyMarkup{}
 	KeysGetNewBtn = KeysMenu.Data("🔑Новый ключ", "KeysGetNew")
+	KeyItem       = KeysMenu.Data("REPLACE", "KeyItem")
+
+	KeyInfo = &t.ReplyMarkup{}
 )

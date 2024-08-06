@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS subscriptions
     initial_price   INTEGER   NOT NULL,
     bandwidth_spent BIGINT    NOT NULL DEFAULT 0,
     key_uuid        UUID      NOT NULL,
-    access_url       TEXT      NOT NULL,
+    access_url      TEXT      NOT NULL,
     auto_prolong    BOOLEAN   NOT NULL DEFAULT FALSE,
     status          TEXT      NOT NULL,
     expired_at      TIMESTAMP NOT NULL,
