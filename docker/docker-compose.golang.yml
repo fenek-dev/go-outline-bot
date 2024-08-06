@@ -1,0 +1,12 @@
+services:
+  golang:
+    build:
+      context: ..
+      dockerfile: ./docker/build/golang/Dockerfile
+    restart: unless-stopped
+    container_name: ${COMPOSE_PROJECT_NAME}.go
+    env_file:
+      - .env
+    networks:
+      - frontend
+      - backend

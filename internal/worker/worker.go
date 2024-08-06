@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 )
@@ -25,7 +26,15 @@ func New(service Service, stopSignal chan os.Signal) *Worker {
 }
 
 func (w *Worker) Run() {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Recovered in f", r)
+			w.Run()
+		}
+	}()
+
 	w.RunCheckExpireSubscriptions()
+	w.RunUpdateBandwidths()
 }
 
 func (w *Worker) Stop() {

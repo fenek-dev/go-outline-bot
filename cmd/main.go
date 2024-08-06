@@ -22,12 +22,14 @@ func main() {
 	ctx := context.Background()
 	cfg := configs.MustLoad()
 
+	logger := slog.Default()
+
 	// Graceful shutdown
 	stopSignal := make(chan os.Signal)
 
 	storage := pg.New(
 		ctx,
-		cfg.DbUrl,
+		cfg.DB,
 		pg.WithMaxConnections(100),
 		pg.WithMinConnections(10),
 	)
@@ -35,16 +37,21 @@ func main() {
 
 	paymentClient := payment_service.NewClient(
 		"",
-		payment_service.WithLogger(slog.Default()),
+		payment_service.WithLogger(logger),
 	)
 
-	service := services.New(storage, paymentClient, cfg)
+	service := services.New(
+		storage,
+		paymentClient,
+		cfg,
+		services.WithLogger(logger),
+	)
 
 	httpServer := server.New(
 		cfg.Port,
 		service,
 		stopSignal,
-		server.WithLogger(slog.Default()),
+		server.WithLogger(logger),
 	)
 
 	httpServer.Handle(http.MethodGet, "/health", httpServer.HealthHandler)
