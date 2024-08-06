@@ -3,6 +3,7 @@ package pg
 import (
 	"context"
 	"errors"
+
 	"github.com/fenek-dev/go-outline-bot/internal/models"
 	"github.com/fenek-dev/go-outline-bot/internal/storage"
 	"github.com/georgysavva/scany/v2/pgxscan"
@@ -32,6 +33,19 @@ func (p *Postgres) CreateTransactionTx(ctx context.Context, tx Executor, transac
 
 func (p *Postgres) CreateTransaction(ctx context.Context, transaction *models.Transaction) (err error) {
 	return p.CreateTransactionTx(ctx, p.conn, transaction)
+}
+
+func (p *Postgres) GetTransactionByExternalID(ctx context.Context, externalID string) (transaction models.Transaction, err error) {
+	err = pgxscan.Get(ctx, p.conn, &transaction, "SELECT * FROM transactions WHERE external_id = $1", externalID)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return transaction, storage.ErrTransactionNotFound
+		}
+		return
+	}
+
+	return transaction, err
 }
 
 func (p *Postgres) GetTransaction(ctx context.Context, transactionID uint64) (transaction models.Transaction, err error) {
