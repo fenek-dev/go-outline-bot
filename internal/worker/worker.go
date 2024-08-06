@@ -23,7 +23,7 @@ func New(service Service, stopSignal chan os.Signal) *Worker {
 	}
 }
 
-func (w *Worker) Start() {
+func (w *Worker) Run() {
 	w.RunCheckExpireSubscriptions()
 }
 
