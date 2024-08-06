@@ -8,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
+	"github.com/fenek-dev/go-outline-bot/configs"
 	"github.com/fenek-dev/go-outline-bot/internal/models"
 	"github.com/fenek-dev/go-outline-bot/internal/storage/pg"
 	"github.com/fenek-dev/go-outline-bot/pkg/payment_service"
@@ -28,6 +29,7 @@ type Storage interface {
 	GetTariff(ctx context.Context, tariffID uint64) (tariff models.Tariff, err error)
 	GetTariffsByServer(ctx context.Context, serverId uint64) (tariffs []models.Tariff, err error)
 
+	GetTransactionByExternalID(ctx context.Context, externalID string) (transaction models.Transaction, err error)
 	GetTransaction(ctx context.Context, transactionID uint64) (transaction models.Transaction, err error)
 	GetTransactionsByUser(ctx context.Context, userID uint64) (transactions []models.Transaction, err error)
 	CreateTransaction(ctx context.Context, transaction *models.Transaction) (err error)
@@ -54,14 +56,16 @@ type Storage interface {
 type Service struct {
 	storage       Storage
 	paymentClient *payment_service.Client
+	config        *configs.Config
 
 	log *slog.Logger
 
 	balanceMu sync.Mutex
 }
 
-func New(storage Storage, paymentClient *payment_service.Client, opts ...Option) *Service {
+func New(storage Storage, paymentClient *payment_service.Client, config *configs.Config, opts ...Option) *Service {
 	s := &Service{
+		config:        config,
 		storage:       storage,
 		paymentClient: paymentClient,
 	}

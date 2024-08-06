@@ -8,14 +8,28 @@ import (
 )
 
 type Config struct {
-	Port  string `yaml:"port" env:"PORT" env-default:"8080"`
-	DbUrl string `yaml:"db_url" env:"DB_URL"`
-	Tg    TelegramConfig
+	Port    string `yaml:"port" env:"PORT" env-default:"8080"`
+	DbUrl   string `yaml:"db_url" env:"DB_URL"`
+	Tg      TelegramConfig
+	Payment PaymentServiceConfig
+	Partner PartnerParamsConfig
 }
 
 type TelegramConfig struct {
 	Debug bool   `env:"DEBUG"`
 	Token string `yaml:"token" env:"TELEGRAM_TOKEN"`
+}
+
+type PaymentServiceConfig struct {
+	BaseUrl     string `yaml:"base_url" env:"PAYMENT_SERVICE_BASE_URL"`
+	PostbackUrl string `yaml:"postback_url" env:"PAYMENT_SERVICE_POSTBACK_URL"`
+	SuccessUrl  string `yaml:"success_url" env:"PAYMENT_SERVICE_SUCCESS_URL"`
+	FailUrl     string `yaml:"fail_url" env:"PAYMENT_SERVICE_FAIL_URL"`
+}
+
+type PartnerParamsConfig struct {
+	DiscountPercent   uint8 `yaml:"discount_percent" env:"PARTNER_DISCOUNT_PERCENT"`
+	CommissionPercent uint8 `yaml:"commission_percent" env:"PARTNER_COMMISSION_PERCENT"`
 }
 
 func MustLoad() *Config {
