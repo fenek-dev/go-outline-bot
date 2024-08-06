@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 
 	"github.com/fenek-dev/go-outline-bot/internal/models"
 	"github.com/fenek-dev/go-outline-bot/internal/storage/pg"
@@ -89,6 +90,7 @@ func (s *Service) RequestDeposit(ctx context.Context, user models.User, amount u
 }
 
 func (s *Service) ConfirmDeposit(ctx context.Context, transactionExternalID string) (err error) {
+	var partnerTransaction *models.Transaction
 	transaction, err := s.storage.GetTransactionByExternalID(ctx, transactionExternalID)
 	if err != nil {
 		return err
@@ -119,7 +121,7 @@ func (s *Service) ConfirmDeposit(ctx context.Context, transactionExternalID stri
 		// Partner commission
 		// @TODO: Outbox for partner commission
 		if user.PartnerID != nil {
-			commission := s.calcPartnerComission(transaction.Amount)
+			commission := s.CalcPartnerComission(transaction.Amount)
 
 			err = s.storage.IncBalanceTx(ctx, tx, *user.PartnerID, commission)
 			if err != nil {
@@ -135,19 +137,32 @@ func (s *Service) ConfirmDeposit(ctx context.Context, transactionExternalID stri
 				return err
 			}
 
-			err = s.storage.CreateTransactionTx(ctx, tx, &models.Transaction{
+			partnerTransaction := &models.Transaction{
 				UserID: *user.PartnerID,
 				Amount: commission,
 				Type:   models.TransactionTypeDeposit,
 				Status: models.TransactionStatusSuccess,
 				Meta:   string(meta),
-			})
+			}
 
-			// @TODO: Send notification to partner
+			err = s.storage.CreateTransactionTx(ctx, tx, partnerTransaction)
+
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil
 	}, nil)
+
+	if err != nil {
+		return fmt.Errorf("failed to confirm deposit: %w", err)
+	}
+
+	if partnerTransaction != nil {
+		// @TODO: To outbox
+		s.NotifyPartnerAboutDeposit(ctx, *partnerTransaction)
+	}
 
 	return err
 }
@@ -159,7 +174,7 @@ func (s *Service) CancelDeposit(ctx context.Context, transactionExternalID strin
 	}
 
 	if transaction.Status != models.TransactionStatusPending {
-		return fmt.Errorf("transaction %s already confirmed", transaction.ID)
+		return fmt.Errorf("transaction %d already confirmed", transaction.ID)
 	}
 
 	err = s.storage.WithTx(ctx, "CancelDeposit", func(ctx context.Context, tx pg.Executor) error {
@@ -169,14 +184,20 @@ func (s *Service) CancelDeposit(ctx context.Context, transactionExternalID strin
 		}
 
 		return nil
-	})
+	}, nil)
 
 	// @TODO: Send notification to user
 
 	return err
 }
 
-func (s *Service) calcPartnerComission(amount uint32) uint32 {
-	commission := amount / uint32(s.config.Partner.CommissionPercent) // @TODO: Get from config PARTNER_COMMISSION_PERCENT
-	return commission - (commission % 10)
+func (s *Service) CalcPartnerComission(amount uint32) uint32 {
+	commissionPercent := s.config.Partner.CommissionPercent
+	if commissionPercent == 0 {
+		return 0
+	}
+
+	commission := math.Floor(float64(amount) * float64(commissionPercent) / 100)
+
+	return uint32(commission)
 }

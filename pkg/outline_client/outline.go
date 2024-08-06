@@ -55,7 +55,7 @@ type ServerInfo struct {
 
 // BytesTransferred represents transferred bytes by client when using Outline VPN
 type BytesTransferred struct {
-	BytesTransferredByUserId map[string]int64 `json:"bytesTransferredByUserId"`
+	BytesTransferredByUserId map[string]uint64 `json:"bytesTransferredByUserId"`
 }
 
 // LimitRequestBody represents request body for setting data limit

@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"context"
-	"github.com/fenek-dev/go-outline-bot/internal/models"
-	"gopkg.in/telebot.v3"
 	"log/slog"
 	"time"
+
+	"github.com/fenek-dev/go-outline-bot/internal/models"
+	"gopkg.in/telebot.v3"
 )
 
 type Option func(*Handlers)

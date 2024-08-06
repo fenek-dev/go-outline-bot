@@ -14,6 +14,7 @@ import (
 	"github.com/fenek-dev/go-outline-bot/internal/storage/pg"
 	"github.com/fenek-dev/go-outline-bot/internal/telegram"
 	"github.com/fenek-dev/go-outline-bot/internal/telegram/handlers"
+	"github.com/fenek-dev/go-outline-bot/internal/worker"
 	"github.com/fenek-dev/go-outline-bot/pkg/payment_service"
 )
 
@@ -49,6 +50,9 @@ func main() {
 	httpServer.Handle(http.MethodGet, "/health", httpServer.HealthHandler)
 	httpServer.Handle(http.MethodPost, "/payment/webhook", httpServer.PaymentWebhookHandler)
 	go httpServer.Run()
+
+	worker := worker.New(service, stopSignal)
+	go worker.Run()
 
 	tgHandlers := handlers.New(service)
 

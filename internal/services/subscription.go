@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math"
 
 	"github.com/fenek-dev/go-outline-bot/internal/models"
 	"github.com/fenek-dev/go-outline-bot/internal/storage/pg"
@@ -23,7 +24,7 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 		return subscription, err
 	}
 
-	price, discountPercent := s.GetTariffPrice(ctx, tariff, user)
+	price, discountPercent := s.CalcTariffPrice(ctx, tariff, user)
 
 	if (user.Balance - price) < 0 {
 		return nil, ErrNotEnoughBalance
@@ -92,7 +93,6 @@ func (s *Service) GetSubscriptions(ctx context.Context, user models.User) (subsc
 
 // TODO: EnableAutoProlongation
 // TODO: DisableAutoProlongation
-
 func (s *Service) ExpireSubscription(ctx context.Context, subscription models.Subscription) (err error) {
 
 	if subscription.AutoProlong {
@@ -115,7 +115,7 @@ func (s *Service) ExpireSubscription(ctx context.Context, subscription models.Su
 		return nil
 	}, nil)
 
-	// TODO: Send notification to user
+	go s.NotifySubscriptionExpired(ctx, subscription)
 
 	return txErr
 }
@@ -140,6 +140,10 @@ func (s *Service) ProlongSubscription(ctx context.Context, subscription models.S
 			IsProlongation: lo.ToPtr(true),
 		})
 
+		if err != nil {
+			return err
+		}
+
 		err = s.storage.CreateTransactionTx(ctx, tx, &models.Transaction{
 			UserID: subscription.UserID,
 			Amount: subscription.InitialPrice,
@@ -147,6 +151,10 @@ func (s *Service) ProlongSubscription(ctx context.Context, subscription models.S
 			Status: models.TransactionStatusSuccess,
 			Meta:   string(meta),
 		})
+
+		if err != nil {
+			return err
+		}
 
 		err = s.storage.IncBalanceTx(ctx, tx, subscription.UserID, subscription.InitialPrice)
 		if err != nil {
@@ -161,28 +169,21 @@ func (s *Service) ProlongSubscription(ctx context.Context, subscription models.S
 		return nil
 	}, nil)
 
-	// TODO: Send notification to user
+	if txErr != nil {
+		return txErr
+	}
 
-	return txErr
-}
+	go s.NotifySubscriptionProlongation(ctx, subscription)
 
-func (s *Service) NotifySubscriptionProlongation(ctx context.Context, subscription models.Subscription) (err error) {
-	// TODO: Send notification to user
 	return nil
 }
 
-func (s *Service) NotifySubscriptionBandwidthLimit(ctx context.Context, subscription models.Subscription, totalBytes uint64) (err error) {
-	// TODO: Send notification to user
-	return nil
-}
-
-func (s *Service) GetTariffPrice(ctx context.Context, tariff models.Tariff, user models.User) (price uint32, discountPercent uint8) {
+func (s *Service) CalcTariffPrice(ctx context.Context, tariff models.Tariff, user models.User) (price uint32, discountPercent uint8) {
 	if user.PartnerID != nil && !user.BonusUsed {
 		discountPercent := s.config.Partner.DiscountPercent // @TODO: To config PARTNER_DISCOUNT_PERCENT
-		price := tariff.Price - (tariff.Price * uint32(discountPercent) / 100)
-		price = tariff.Price - (tariff.Price % 10) // round to 10
+		price := math.Floor(float64(tariff.Price) * (1 - float64(discountPercent/100)))
 
-		return price, discountPercent
+		return uint32(price), discountPercent
 	}
 
 	return tariff.Price, 0

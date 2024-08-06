@@ -3,10 +3,12 @@ package pg
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/fenek-dev/go-outline-bot/internal/models"
 	"github.com/fenek-dev/go-outline-bot/internal/storage"
 	"github.com/georgysavva/scany/v2/pgxscan"
 	"github.com/jackc/pgx/v5"
+	"strings"
 	"time"
 )
 
@@ -63,4 +65,82 @@ func (p *Postgres) ProlongSubscriptionTx(ctx context.Context, tx Executor, subsc
 	}
 
 	return err
+}
+
+func (p *Postgres) GetExpiredSubscriptions(ctx context.Context) (subscriptions []models.Subscription, err error) {
+	rows, err := p.conn.Query(ctx, "SELECT * FROM subscriptions WHERE expired_at < $1", time.Now())
+	if err != nil {
+		return nil, err
+	}
+
+	err = pgxscan.ScanAll(&subscriptions, rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return subscriptions, err
+}
+
+func (p *Postgres) GetSubscriptionsByBandwidthReached(ctx context.Context) (subscriptions []models.Subscription, err error) {
+	rows, err := p.conn.Query(
+		ctx,
+		`
+		SELECT s.* FROM subscriptions s 
+    	JOIN public.tariffs t ON s.tariff_id = t.id 
+		    WHERE t.bandwidth <= s.bandwidth_spent
+		`,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	err = pgxscan.ScanAll(&subscriptions, rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return subscriptions, err
+}
+
+func (p *Postgres) GetProlongableSubscriptions(ctx context.Context) (subscriptions []models.Subscription, err error) {
+	rows, err := p.conn.Query(
+		ctx,
+		"SELECT * FROM subscriptions WHERE expired_at < $1 AND auto_prolong = TRUE",
+		time.Now(),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	err = pgxscan.ScanAll(&subscriptions, rows)
+	if err != nil {
+		return nil, err
+	}
+
+	return subscriptions, err
+}
+
+func (p *Postgres) UpdateSubscriptionsStatus(ctx context.Context, subscriptionIDs []uint64, status models.SubscriptionStatus) (err error) {
+	_, err = p.conn.Exec(ctx, "UPDATE subscriptions SET status = $1 WHERE id = ANY($2)", status, subscriptionIDs)
+
+	return err
+}
+
+func (p *Postgres) UpdateSubscriptionsBandwidthByKeyID(ctx context.Context, serverID uint64, metrics map[string]uint64) (err error) {
+	values := make([]string, 0, len(metrics))
+	for keyID, bandwidth := range metrics {
+		values = append(values, fmt.Sprintf("(%d, %s)", bandwidth, keyID))
+	}
+	result := strings.Join(values, ",")
+
+	_, err = p.conn.Exec(
+		ctx,
+		`UPDATE subscriptions s
+		SET bandwidth_spent=tmp.spent 
+		FROM (VALUES $1) AS tmp (spent, key) WHERE s.key_uuid=tmp.key AND s.server_id=$2`,
+		result,
+		serverID,
+	)
+
+	return nil
 }

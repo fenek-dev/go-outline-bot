@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+
 	"github.com/fenek-dev/go-outline-bot/internal/models"
 )
 

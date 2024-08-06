@@ -134,7 +134,7 @@ func Test_CreateTransaction(t *testing.T) {
 			httpClient := mocks.NewHTTPClient(t)
 			httpClient.On("Do", mock.Anything).Return(tc.response, tc.error)
 
-			client := NewTestClient(t, httpClient)
+			client := NewClient("", WithHTTPClient(httpClient))
 
 			ctx := context.Background()
 
