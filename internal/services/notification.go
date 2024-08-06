@@ -35,3 +35,8 @@ func (s *Service) NotifySubscriptionExpired(ctx context.Context, subscription mo
 	// TODO: Send notification to user
 	return nil
 }
+
+func (s *Service) NotifyPartnerAboutDeposit(ctx context.Context, transaction models.Transaction) (err error) {
+	// TODO: Send notification to partner
+	return nil
+}

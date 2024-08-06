@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"os"
+	"time"
 )
 
 type Service interface {
@@ -39,6 +40,7 @@ func (w *Worker) RunCheckExpireSubscriptions() {
 				return
 			default:
 				w.service.CheckExpireSubscriptions(context.Background())
+				time.Sleep(5 * time.Minute)
 			}
 		}
 	}()
@@ -52,6 +54,7 @@ func (w *Worker) RunUpdateBandwidths() {
 				return
 			default:
 				w.service.UpdateBandwidths(context.Background())
+				time.Sleep(5 * time.Minute)
 			}
 		}
 	}()
@@ -65,6 +68,7 @@ func (w *Worker) RunCheckBandwidthLimits() {
 				return
 			default:
 				w.service.CheckBandwidthLimits(context.Background())
+				time.Sleep(5 * time.Minute)
 			}
 		}
 	}()

@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/fenek-dev/go-outline-bot/internal/models"
 )
@@ -28,8 +27,6 @@ func (s *Service) CheckExpireSubscriptions(ctx context.Context) (err error) {
 	for _, subscription := range subscriptions {
 		go s.NotifySubscriptionExpired(ctx, subscription)
 	}
-
-	time.Sleep(5 * time.Minute)
 
 	return nil
 }
@@ -75,8 +72,6 @@ func (s *Service) UpdateBandwidths(ctx context.Context) (err error) {
 
 		s.storage.UpdateSubscriptionsBandwidthByKeyID(ctx, server.ID, metrics)
 	}
-
-	time.Sleep(5 * time.Minute)
 
 	return nil
 }
