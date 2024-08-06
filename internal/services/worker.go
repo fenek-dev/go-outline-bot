@@ -12,7 +12,7 @@ func (s *Service) CheckExpireSubscriptions(ctx context.Context) (err error) {
 	subscriptions, err := s.storage.GetExpiredSubscriptions(ctx)
 	if err != nil {
 		s.log.Error(fmt.Sprintf("GetExpiredSubscriptions: %v", err))
-		return err
+		return fmt.Errorf("GetExpiredSubscriptions: %w", err)
 	}
 
 	// Diactivate subscriptions

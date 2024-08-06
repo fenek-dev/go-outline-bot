@@ -80,6 +80,7 @@ func (s *Service) RequestDeposit(ctx context.Context, user models.User, amount u
 
 	if err != nil {
 		// TODO: Update transaction status
+		return "", fmt.Errorf("failed to request deposit: %w", err)
 	}
 
 	if response.Action.Type != payment_service.ResultTypeRedirect || response.Action.RedirectURL == nil {
@@ -93,27 +94,27 @@ func (s *Service) ConfirmDeposit(ctx context.Context, transactionExternalID stri
 	var partnerTransaction *models.Transaction
 	transaction, err := s.storage.GetTransactionByExternalID(ctx, transactionExternalID)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get transaction by external id: %w", err)
 	}
 
 	if transaction.Status != models.TransactionStatusPending {
-		return fmt.Errorf("transaction %s already confirmed", transaction.ID)
+		return fmt.Errorf("transaction %d already confirmed", transaction.ID)
 	}
 
 	user, err := s.storage.GetUser(ctx, transaction.UserID)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get user: %w", err)
 	}
 
 	err = s.storage.WithTx(ctx, "ConfirmDeposit", func(ctx context.Context, tx pg.Executor) error {
 		err = s.storage.IncBalanceTx(ctx, tx, user.ID, transaction.Amount)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to increase balance: %w", err)
 		}
 
 		err = s.storage.UpdateTransactionStatusTx(ctx, tx, transaction.ID, models.TransactionStatusSuccess)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to update transaction status: %w", err)
 		}
 
 		// @TODO: Send notification to user
@@ -125,7 +126,7 @@ func (s *Service) ConfirmDeposit(ctx context.Context, transactionExternalID stri
 
 			err = s.storage.IncBalanceTx(ctx, tx, *user.PartnerID, commission)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to increase partner balance: %w", err)
 			}
 
 			meta, err := json.Marshal(models.TransactionMeta{
@@ -134,7 +135,7 @@ func (s *Service) ConfirmDeposit(ctx context.Context, transactionExternalID stri
 			})
 
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to marshal meta: %w", err)
 			}
 
 			partnerTransaction := &models.Transaction{
@@ -148,7 +149,7 @@ func (s *Service) ConfirmDeposit(ctx context.Context, transactionExternalID stri
 			err = s.storage.CreateTransactionTx(ctx, tx, partnerTransaction)
 
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to create partner transaction: %w", err)
 			}
 		}
 
@@ -159,7 +160,7 @@ func (s *Service) ConfirmDeposit(ctx context.Context, transactionExternalID stri
 		return fmt.Errorf("failed to confirm deposit: %w", err)
 	}
 
-	if partnerTransaction != nil {
+	if user.PartnerID != nil && partnerTransaction != nil {
 		// @TODO: To outbox
 		s.NotifyPartnerAboutDeposit(ctx, *partnerTransaction)
 	}
@@ -170,7 +171,7 @@ func (s *Service) ConfirmDeposit(ctx context.Context, transactionExternalID stri
 func (s *Service) CancelDeposit(ctx context.Context, transactionExternalID string) (err error) {
 	transaction, err := s.storage.GetTransactionByExternalID(ctx, transactionExternalID)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get transaction by external id: %w", err)
 	}
 
 	if transaction.Status != models.TransactionStatusPending {

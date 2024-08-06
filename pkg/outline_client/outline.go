@@ -25,7 +25,7 @@ type OutlineKey struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
 	Password  string `json:"password"`
-	Port      int64  `json:"port"`
+	Port      uint16 `json:"port"`
 	Method    string `json:"method"`
 	AccessURL string `json:"accessUrl"`
 }
