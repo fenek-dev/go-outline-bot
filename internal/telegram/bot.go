@@ -49,6 +49,8 @@ func InitBot(cfg *configs.TelegramConfig, h *handlers.Handlers) (*telebot.Bot, e
 
 	// Keys
 	b.Handle(&m.KeysOpenBtn, h.OpenKeysMenu)
+	b.Handle(&m.KeyItem, h.OpenKeyInfo)
+	b.Handle(&m.KeyAutoProlongBtn, h.ToggleAutoProlong)
 
 	//Servers
 	b.Handle(&m.KeysGetNewBtn, h.OpenServersMenu)

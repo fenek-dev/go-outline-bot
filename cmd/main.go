@@ -60,7 +60,7 @@ func main() {
 	log.Println("Telegram bot api inited")
 
 	if err != nil {
-		panic(fmt.Sprintf("Can not connect to telegram bot: %e", err))
+		panic(fmt.Errorf("can not connect to telegram bot: %w", err))
 	}
 
 	bot.Start()

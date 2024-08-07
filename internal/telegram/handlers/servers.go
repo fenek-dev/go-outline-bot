@@ -14,6 +14,7 @@ func (h *Handlers) OpenServersMenu(c telebot.Context) (err error) {
 	servers, err := h.service.GetAllServers(ctx)
 
 	if err != nil {
+		h.log.Error("can not get servers", "error", err)
 		return err
 	}
 

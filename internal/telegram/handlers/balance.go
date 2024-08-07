@@ -17,6 +17,7 @@ func (h *Handlers) OpenBalance(c t.Context) (err error) {
 	balance, err := h.service.GetBalance(ctx, ID)
 
 	if err != nil {
+		h.log.Error("can not get balance", "error", err)
 		return err
 	}
 

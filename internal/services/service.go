@@ -36,6 +36,7 @@ type Storage interface {
 	CreateTransactionTx(ctx context.Context, tx pg.Executor, transaction *models.Transaction) (terr error)
 	UpdateTransactionStatusTx(ctx context.Context, tx pg.Executor, transactionID uint64, status models.TransactionStatus) (err error)
 
+	GetSubscription(ctx context.Context, id uint64) (subscription models.Subscription, err error)
 	GetSubscriptionsByUser(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error)
 	GetProlongableSubscriptions(ctx context.Context) (subscriptions []models.Subscription, err error)
 	GetExpiredSubscriptions(ctx context.Context) (subscriptions []models.Subscription, err error)
@@ -47,6 +48,7 @@ type Storage interface {
 	UpdateSubscriptionsBandwidthByKeyID(ctx context.Context, serverID uint64, metrics map[string]uint64) (err error)
 	ProlongSubscriptionTx(ctx context.Context, tx pg.Executor, subscriptionID uint64, expiredAt time.Time) (err error)
 	TrialSubscriptionExists(ctx context.Context, userID uint64) (has bool, err error)
+	ToggleAutoProlong(ctx context.Context, subscriptionID uint64) (auto bool, err error)
 
 	GetServer(ctx context.Context, serverID uint64) (server models.Server, err error)
 	GetAllServers(ctx context.Context) (servers []models.Server, err error)

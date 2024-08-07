@@ -18,7 +18,7 @@ type Subscription struct {
 	InitialPrice   uint32    `json:"initial_price" db:"initial_price"`
 	BandwidthSpent uint64    `json:"bandwidth_spent" db:"bandwidth_spent"`
 	BandwidthTotal *uint64   `json:"bandwidth_total" db:"bandwidth_total"` // Optional field from subscription join tariff
-	KeyUUID        string    `json:"-" db:"key_uucid"`
+	KeyUUID        string    `json:"-" db:"key_uuid"`
 	AccessUrl      string    `json:"access_url" db:"access_url"`
 	ServerIP       string    `json:"server_ip" db:"server_ip"`
 	ServerPort     uint16    `json:"server_port" db:"server_port"`

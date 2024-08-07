@@ -20,12 +20,7 @@ var (
 	ErrNotEnoughBalance SubscriptionError = errors.New("not enough balance")
 )
 
-func (s *Service) CreateSubscription(ctx context.Context, user models.User, tariffID uint64) (subscription *models.Subscription, err error) {
-	tariff, err := s.storage.GetTariff(ctx, tariffID)
-	if err != nil {
-		return subscription, fmt.Errorf("get tariff: %w", err)
-	}
-
+func (s *Service) CreateSubscription(ctx context.Context, user models.User, tariff models.Tariff) (subscription *models.Subscription, err error) {
 	if tariff.IsTrial {
 		hasTrial, err := s.storage.TrialSubscriptionExists(ctx, user.ID)
 		if err != nil {
@@ -112,8 +107,12 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 	return subscription, nil
 }
 
-func (s *Service) GetSubscriptions(ctx context.Context, user models.User) (subscriptions []models.Subscription, err error) {
-	return s.storage.GetSubscriptionsByUser(ctx, user.ID)
+func (s *Service) GetSubscription(ctx context.Context, id uint64) (subscription models.Subscription, err error) {
+	return s.storage.GetSubscription(ctx, id)
+}
+
+func (s *Service) GetSubscriptionsByUser(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error) {
+	return s.storage.GetSubscriptionsByUser(ctx, userID)
 }
 
 // TODO: EnableAutoProlongation
@@ -216,4 +215,8 @@ func (s *Service) CalcTariffPrice(ctx context.Context, tariff models.Tariff, use
 	}
 
 	return tariff.Price, 0
+}
+
+func (s *Service) ToggleAutoProlong(ctx context.Context, subscriptionID uint64) (auto bool, err error) {
+	return s.storage.ToggleAutoProlong(ctx, subscriptionID)
 }

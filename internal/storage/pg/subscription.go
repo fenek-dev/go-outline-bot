@@ -16,11 +16,10 @@ import (
 func (p *Postgres) CreateSubscription(ctx context.Context, subscription *models.Subscription) (err error) {
 	return p.CreateSubscriptionTx(ctx, p.conn, subscription)
 }
-
 func (p *Postgres) CreateSubscriptionTx(ctx context.Context, tx Executor, subscription *models.Subscription) (err error) {
 	err = tx.QueryRow(
 		ctx,
-		"INSERT INTO subscriptions (user_id, server_id, tariff_id, initial_price, key_uuid, accessurl, status, expired_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
+		"INSERT INTO subscriptions (user_id, server_id, tariff_id, initial_price, key_uuid, access_url, status, expired_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
 		subscription.UserID,
 		subscription.ServerID,
 		subscription.TariffID,
@@ -32,6 +31,18 @@ func (p *Postgres) CreateSubscriptionTx(ctx context.Context, tx Executor, subscr
 	).Scan(&subscription.ID)
 
 	return err
+}
+
+func (p *Postgres) GetSubscription(ctx context.Context, id uint64) (subscription models.Subscription, err error) {
+	err = pgxscan.Get(ctx, p.conn, &subscription, "SELECT * FROM subscriptions WHERE id = $1", id)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return subscription, storage.ErrSubscriptionNotFound
+		}
+		return subscription, err
+	}
+
+	return subscription, err
 }
 
 func (p *Postgres) GetSubscriptionsByUser(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error) {
@@ -66,6 +77,22 @@ func (p *Postgres) ProlongSubscriptionTx(ctx context.Context, tx Executor, subsc
 	}
 
 	return err
+}
+
+func (p *Postgres) ToggleAutoProlong(ctx context.Context, subscriptionID uint64) (auto bool, err error) {
+	err = pgxscan.Get(
+		ctx,
+		p.conn,
+		&auto,
+		"UPDATE subscriptions SET auto_prolong = NOT auto_prolong WHERE id = $1 RETURNING auto_prolong",
+		subscriptionID,
+	)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, storage.ErrSubscriptionNotFound
+	}
+
+	return auto, err
 }
 
 func (p *Postgres) GetExpiredSubscriptions(ctx context.Context) (subscriptions []models.Subscription, err error) {

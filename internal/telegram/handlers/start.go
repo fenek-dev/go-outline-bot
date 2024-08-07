@@ -20,11 +20,12 @@ func (h *Handlers) Start(c telebot.Context) (err error) {
 	err = h.service.CreateUser(ctx, user)
 
 	if err != nil && !errors.Is(err, storage.ErrUserAlreadyExists) {
-		c.Send("Something gone wrong, try again")
-		return fmt.Errorf("unexpected error: %e", err)
+		h.log.Error("error on start", "error", err)
+		_ = c.Send("Ой, что-то пошло не так. Попробуйте еще раз", markup.OnlyClose)
+		return fmt.Errorf("unexpected error: %w", err)
 	}
 
-	return c.Send("Welcome to the club, buddy", markup.Menu)
+	return c.Send("Привет, я бот который бла бла бла", markup.Menu)
 }
 
 func (h *Handlers) Close(c telebot.Context) error {
