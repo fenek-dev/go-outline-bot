@@ -2,7 +2,7 @@ package telegram
 
 import (
 	"fmt"
-	m "github.com/fenek-dev/go-outline-bot/internal/telegram/markup"
+	"github.com/fenek-dev/go-outline-bot/internal/markup"
 	"time"
 
 	"github.com/fenek-dev/go-outline-bot/configs"
@@ -27,43 +27,45 @@ func InitBot(cfg *configs.TelegramConfig, h *handlers.Handlers) (*telebot.Bot, e
 		return nil, fmt.Errorf("can not connect to telegram bot: %w", err)
 	}
 
-	m.Init()
+	markup.Init()
 
 	b.Handle("/start", h.Start)
 
-	b.Handle(&m.ClientListOpenBtn, h.OpenClientsList)
+	b.Handle(&markup.ClientListOpenBtn, h.OpenClientsList)
 
-	b.Handle(&m.CloseBtn, h.Close)
+	b.Handle(&markup.CloseBtn, h.Close)
 
-	b.Handle(&m.ClientListIOS, h.ClientsListIOS)
-	b.Handle(&m.IOSListBackBtn, h.BackMacOSList)
+	b.Handle(&markup.ClientListIOS, h.ClientsListIOS)
+	b.Handle(&markup.IOSListBackBtn, h.BackMacOSList)
 
-	b.Handle(&m.ClientListAndroid, h.ClientsListAndroid)
-	b.Handle(&m.AndroidListBackBtn, h.BackAndroidList)
+	b.Handle(&markup.ClientListAndroid, h.ClientsListAndroid)
+	b.Handle(&markup.AndroidListBackBtn, h.BackAndroidList)
 
-	b.Handle(&m.ClientListWindows, h.ClientsListWindows)
-	b.Handle(&m.WindowsListBackBtn, h.BackWindowsList)
+	b.Handle(&markup.ClientListWindows, h.ClientsListWindows)
+	b.Handle(&markup.WindowsListBackBtn, h.BackWindowsList)
 
-	b.Handle(&m.ClientListMacOS, h.ClientsListMacOS)
-	b.Handle(&m.MacOSListBackBtn, h.BackMacOSList)
+	b.Handle(&markup.ClientListMacOS, h.ClientsListMacOS)
+	b.Handle(&markup.MacOSListBackBtn, h.BackMacOSList)
 
 	// Keys
-	b.Handle(&m.KeysOpenBtn, h.OpenKeysMenu)
-	b.Handle(&m.KeyItem, h.OpenKeyInfo)
-	b.Handle(&m.KeyAutoProlongBtn, h.ToggleAutoProlong)
+	b.Handle(&markup.KeysOpenBtn, h.OpenKeysMenu)
+	b.Handle(&markup.KeyItem, h.OpenKeyInfo)
+	b.Handle(&markup.KeyAutoProlongBtn, h.ToggleAutoProlong)
 
 	//Servers
-	b.Handle(&m.KeysGetNewBtn, h.OpenServersMenu)
-	b.Handle(&m.ServersBackBtn, h.BackServersMenu)
+	b.Handle(&markup.KeysGetNewBtn, h.OpenServersMenu)
+	b.Handle(&markup.ServersBackBtn, h.BackServersMenu)
 
-	b.Handle(&m.ServerItem, h.OpenTariffsMenu)
-	b.Handle(&m.TariffsBackBtn, h.BackTariffsMenu)
+	b.Handle(&markup.ServerItem, h.OpenTariffsMenu)
+	b.Handle(&markup.TariffsBackBtn, h.BackTariffsMenu)
 
 	// Tariffs
-	b.Handle(&m.TariffItem, h.OpenTariff)
-	b.Handle(&m.TariffBuyBtn, h.BuySubscription)
+	b.Handle(&markup.TariffItem, h.OpenTariff)
+	b.Handle(&markup.TariffBuyBtn, h.BuySubscription)
 
 	// Balance
-	b.Handle(&m.BalanceOpenBtn, h.OpenBalance)
+	b.Handle(&markup.BalanceOpenBtn, h.OpenBalance)
+	b.Handle(&markup.PartnerDepositOpenBalanceBtn, h.OpenBalance)
+
 	return b, nil
 }

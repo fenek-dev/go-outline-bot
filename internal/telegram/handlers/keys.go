@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/fenek-dev/go-outline-bot/internal/markup"
 	"github.com/fenek-dev/go-outline-bot/internal/storage"
-	m "github.com/fenek-dev/go-outline-bot/internal/telegram/markup"
 	"gopkg.in/telebot.v3"
 	"math"
 	"strconv"
@@ -22,11 +22,11 @@ func (h *Handlers) OpenKeysMenu(c telebot.Context) error {
 
 	if err != nil {
 		h.log.Error("Can not get subs", "error", err)
-		return c.Send("Произошла ошибка. Попробуйте еще раз", m.OnlyClose)
+		return c.Send("Произошла ошибка. Попробуйте еще раз", markup.OnlyClose)
 	}
 
 	rows := make([]telebot.Row, 0, len(subs)+2)
-	rows = append(rows, m.KeysMenu.Row(m.KeysGetNewBtn))
+	rows = append(rows, markup.KeysMenu.Row(markup.KeysGetNewBtn))
 
 	for _, sub := range subs {
 		if time.Now().After(sub.ExpiredAt) {
@@ -36,19 +36,19 @@ func (h *Handlers) OpenKeysMenu(c telebot.Context) error {
 		btn := telebot.Btn{
 			Text:   fmt.Sprintf("%d, (%vд)", sub.ID, math.Trunc(sub.ExpiredAt.Sub(time.Now()).Hours()/24)),
 			Data:   strconv.FormatUint(sub.ID, 10),
-			Unique: m.KeyItem.Unique,
+			Unique: markup.KeyItem.Unique,
 		}
 
-		rows = append(rows, m.KeysMenu.Row(btn))
+		rows = append(rows, markup.KeysMenu.Row(btn))
 	}
 
-	rows = append(rows, m.KeysMenu.Row(m.CloseBtn))
+	rows = append(rows, markup.KeysMenu.Row(markup.CloseBtn))
 
-	m.KeysMenu.Inline(
+	markup.KeysMenu.Inline(
 		rows...,
 	)
 
-	return c.Send("Ключи:", m.KeysMenu)
+	return c.Send("Ключи:", markup.KeysMenu)
 }
 
 func (h *Handlers) CloseKeysMenu(c telebot.Context) error {
@@ -70,9 +70,9 @@ func (h *Handlers) OpenKeyInfo(c telebot.Context) error {
 	if err != nil {
 		h.log.Error("Can not get sub", "error", err)
 		if errors.Is(err, storage.ErrSubscriptionNotFound) {
-			return c.Send("Ключ не найдена", m.OnlyClose)
+			return c.Send("Ключ не найдена", markup.OnlyClose)
 		}
-		return c.Send("Произошла ошибка. Попробуйте еще раз", m.OnlyClose)
+		return c.Send("Произошла ошибка. Попробуйте еще раз", markup.OnlyClose)
 	}
 
 	text := "✅Включить Автопродление"
@@ -80,10 +80,10 @@ func (h *Handlers) OpenKeyInfo(c telebot.Context) error {
 		text = "❌Выключить Автопродление"
 	}
 
-	m.KeyInfo.Inline(
-		m.KeyInfo.Row(m.WithText(text, m.WithData(subID, m.KeyAutoProlongBtn))),
-		m.KeyInfo.Row(m.CloseBtn),
+	markup.KeyInfo.Inline(
+		markup.KeyInfo.Row(markup.WithText(text, markup.WithData(subID, markup.KeyAutoProlongBtn))),
+		markup.KeyInfo.Row(markup.CloseBtn),
 	)
 
-	return c.Send(fmt.Sprintf("Ключ %d, действителен до %v", sub.ID, sub.ExpiredAt), m.KeyInfo)
+	return c.Send(fmt.Sprintf("Ключ %d, действителен до %v", sub.ID, sub.ExpiredAt), markup.KeyInfo)
 }

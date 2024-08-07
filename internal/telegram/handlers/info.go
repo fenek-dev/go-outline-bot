@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/fenek-dev/go-outline-bot/internal/telegram/markup"
+	"github.com/fenek-dev/go-outline-bot/internal/markup"
 	"gopkg.in/telebot.v3"
 )
 

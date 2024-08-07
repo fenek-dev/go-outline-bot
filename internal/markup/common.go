@@ -20,3 +20,7 @@ func WithText(text string, btn t.Btn) t.Btn {
 	btn.Text = text
 	return btn
 }
+
+func WithDataAndText(data string, text string, btn t.Btn) t.Btn {
+	return WithData(data, WithText(text, btn))
+}
