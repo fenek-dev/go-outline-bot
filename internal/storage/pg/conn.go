@@ -3,8 +3,10 @@ package pg
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"log/slog"
+
+	"github.com/fenek-dev/go-outline-bot/configs"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Option func(*pgxpool.Config, *Postgres)
@@ -15,9 +17,19 @@ type Postgres struct {
 	log *slog.Logger
 }
 
-func New(ctx context.Context, DBUrl string, opts ...Option) *Postgres {
+func New(ctx context.Context, DBUrl configs.DBConfig, opts ...Option) *Postgres {
 
-	cfg, err := pgxpool.ParseConfig(DBUrl)
+	dsn := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		DBUrl.User,
+		DBUrl.Pass,
+		DBUrl.Host,
+		DBUrl.Port,
+		DBUrl.Name,
+		DBUrl.SSLMode,
+	)
+
+	cfg, err := pgxpool.ParseConfig(dsn)
 	if err != nil {
 		panic(fmt.Sprintf("can not parse db config: %s", err.Error()))
 	}
@@ -28,7 +40,7 @@ func New(ctx context.Context, DBUrl string, opts ...Option) *Postgres {
 		opt(cfg, p)
 	}
 
-	conn, err := pgxpool.New(ctx, DBUrl)
+	conn, err := pgxpool.New(ctx, dsn)
 
 	if err != nil {
 		panic(fmt.Sprintf("can not connect to db: %s", err.Error()))

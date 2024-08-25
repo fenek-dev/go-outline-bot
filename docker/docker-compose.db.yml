@@ -1,15 +1,30 @@
+networks:
+  frontend:
+    external:
+      name: nginx-proxy
+  backend:
+    external:
+      name: ${COMPOSE_PROJECT_NAME}.backend
+
 services:
   postgres:
     image: postgres:16.2-alpine
+    container_name: ${COMPOSE_PROJECT_NAME}.postgres
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:${DB_PORT}"
     environment:
-      POSTGRES_DB: "bot"
-      POSTGRES_HOST_AUTH_METHOD: "trust"
-      POSTGRES_PASSWORD: "password"
-      POSTGRES_USER: "user"
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_USER: ${DB_USER}
+    networks:
+      - frontend
+      - backend
+    volumes:
+      - ./.data/postgres:/var/lib/postgresql/data
+    command: -p ${DB_PORT}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      test: ["CMD-SHELL", "pg_isready", "-d", "$${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 10

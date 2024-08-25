@@ -8,11 +8,20 @@ import (
 )
 
 type Config struct {
-	Port    string `yaml:"port" env:"PORT" env-default:"8080"`
-	DbUrl   string `yaml:"db_url" env:"DB_URL"`
+	Port    string `yaml:"port" env:"APP_PORT" env-default:"8080"`
+	DB      DBConfig
 	Tg      TelegramConfig
 	Payment PaymentServiceConfig
 	Partner PartnerParamsConfig
+}
+
+type DBConfig struct {
+	Host    string `yaml:"host" env:"DB_HOST"`
+	Port    string `yaml:"port" env:"DB_PORT"`
+	User    string `yaml:"user" env:"DB_USER"`
+	Pass    string `yaml:"pass" env:"DB_PASS"`
+	Name    string `yaml:"name" env:"DB_NAME"`
+	SSLMode string `yaml:"ssl_mode" env:"DB_SSL_MODE"`
 }
 
 type TelegramConfig struct {
