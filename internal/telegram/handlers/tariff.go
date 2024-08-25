@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"github.com/fenek-dev/go-outline-bot/internal/telegram/markup"
+	markup2 "github.com/fenek-dev/go-outline-bot/internal/markup"
 	"gopkg.in/telebot.v3"
 	"strconv"
 )
@@ -30,23 +30,23 @@ func (h *Handlers) OpenTariffsMenu(c telebot.Context) error {
 		btn := telebot.Btn{
 			Text:   fmt.Sprintf("%s, %vGB, %v₽/%vд", tariff.Name, tariff.Bandwidth, tariff.Price, tariff.Duration),
 			Data:   strconv.FormatUint(tariff.ID, 10),
-			Unique: markup.TariffItem.Unique,
+			Unique: markup2.TariffItem.Unique,
 		}
 
-		rows = append(rows, markup.TariffsMenu.Row(btn))
+		rows = append(rows, markup2.TariffsMenu.Row(btn))
 	}
 
-	rows = append(rows, markup.TariffsMenu.Row(markup.TariffsBackBtn))
+	rows = append(rows, markup2.TariffsMenu.Row(markup2.TariffsBackBtn))
 
-	markup.TariffsMenu.Inline(
+	markup2.TariffsMenu.Inline(
 		rows...,
 	)
 
-	return c.Edit("Тарифы:", markup.TariffsMenu)
+	return c.Edit("Тарифы:", markup2.TariffsMenu)
 }
 
 func (h *Handlers) BackTariffsMenu(c telebot.Context) error {
-	return c.Edit("Сервера:", markup.ServersMenu)
+	return c.Edit("Сервера:", markup2.ServersMenu)
 }
 
 func (h *Handlers) OpenTariff(c telebot.Context) error {
@@ -70,14 +70,14 @@ func (h *Handlers) OpenTariff(c telebot.Context) error {
 		return err
 	}
 
-	markup.TariffInfo.Inline(
-		markup.TariffInfo.Row(markup.WithData(tariffID, markup.TariffBuyBtn)),
-		markup.TariffInfo.Row(markup.CloseBtn),
+	markup2.TariffInfo.Inline(
+		markup2.TariffInfo.Row(markup2.WithData(tariffID, markup2.TariffBuyBtn)),
+		markup2.TariffInfo.Row(markup2.CloseBtn),
 	)
 
-	return c.Send(fmt.Sprintf("Тариф %s, %vGB, %v₽/%vд", tariff.Name, tariff.Bandwidth, tariff.Price, tariff.Duration), markup.TariffInfo)
+	return c.Send(fmt.Sprintf("Тариф %s, %vGB, %v₽/%vд", tariff.Name, tariff.Bandwidth, tariff.Price, tariff.Duration), markup2.TariffInfo)
 }
 
 func (h *Handlers) BackTariff(c telebot.Context) error {
-	return c.Edit("Тарифы:", markup.TariffsMenu)
+	return c.Edit("Тарифы:", markup2.TariffsMenu)
 }

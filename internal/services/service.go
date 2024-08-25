@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"github.com/fenek-dev/go-outline-bot/internal/notifier"
 	"log/slog"
 	"sync"
 	"time"
@@ -60,17 +61,19 @@ type Service struct {
 	storage       Storage
 	paymentClient *payment_service.Client
 	config        *configs.Config
+	notifier      *notifier.Notifier
 
 	log *slog.Logger
 
 	balanceMu sync.Mutex
 }
 
-func New(storage Storage, paymentClient *payment_service.Client, config *configs.Config, opts ...Option) *Service {
+func New(storage Storage, paymentClient *payment_service.Client, notifier *notifier.Notifier, config *configs.Config, opts ...Option) *Service {
 	s := &Service{
 		config:        config,
 		storage:       storage,
 		paymentClient: paymentClient,
+		notifier:      notifier,
 	}
 
 	for _, opt := range opts {

@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/fenek-dev/go-outline-bot/internal/telegram/markup"
+	markup2 "github.com/fenek-dev/go-outline-bot/internal/markup"
 	"golang.org/x/net/context"
 	"gopkg.in/telebot.v3"
 	"strconv"
@@ -24,21 +24,21 @@ func (h *Handlers) OpenServersMenu(c telebot.Context) (err error) {
 		btn := telebot.Btn{
 			Text:   server.Name,
 			Data:   strconv.FormatUint(server.ID, 10),
-			Unique: markup.ServerItem.Unique,
+			Unique: markup2.ServerItem.Unique,
 		}
 
-		rows = append(rows, markup.ServersMenu.Row(btn))
+		rows = append(rows, markup2.ServersMenu.Row(btn))
 	}
 
-	rows = append(rows, markup.ServersMenu.Row(markup.ServersBackBtn))
+	rows = append(rows, markup2.ServersMenu.Row(markup2.ServersBackBtn))
 
-	markup.ServersMenu.Inline(
+	markup2.ServersMenu.Inline(
 		rows...,
 	)
 
-	return c.Edit("Сервера:", markup.ServersMenu)
+	return c.Edit("Сервера:", markup2.ServersMenu)
 }
 
 func (h *Handlers) BackServersMenu(c telebot.Context) error {
-	return c.Edit("Ключи:", markup.KeysMenu)
+	return c.Edit("Ключи:", markup2.KeysMenu)
 }

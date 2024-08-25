@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"github.com/fenek-dev/go-outline-bot/internal/telegram/markup"
+	"github.com/fenek-dev/go-outline-bot/internal/markup"
 	t "gopkg.in/telebot.v3"
 )
 
