@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -64,7 +63,7 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 	txErr := s.storage.WithTx(ctx, "CreateSubscription", func(ctx context.Context, tx pg.Executor) error {
 		err = s.storage.CreateSubscriptionTx(ctx, tx, subscription)
 
-		meta, err := json.Marshal(models.TransactionMeta{
+		meta := utils.StructToMap(models.TransactionMeta{
 			IsDiscounted:    lo.ToPtr(discountPercent > 0),
 			SubscriptionID:  &subscription.ID,
 			DiscountPercent: &discountPercent,
@@ -79,7 +78,7 @@ func (s *Service) CreateSubscription(ctx context.Context, user models.User, tari
 			Amount: price,
 			Type:   models.TransactionTypeWithdrawal,
 			Status: models.TransactionStatusSuccess,
-			Meta:   string(meta),
+			Meta:   meta,
 		})
 
 		if err != nil {
@@ -164,20 +163,16 @@ func (s *Service) ProlongSubscription(ctx context.Context, subscription models.S
 	}
 
 	txErr := s.storage.WithTx(ctx, "ProlongSubscription", func(ctx context.Context, tx pg.Executor) error {
-		meta, err := json.Marshal(models.TransactionMeta{
+		meta := utils.StructToMap(models.TransactionMeta{
 			IsProlongation: lo.ToPtr(true),
 		})
-
-		if err != nil {
-			return fmt.Errorf("marshal transaction meta: %w", err)
-		}
 
 		err = s.storage.CreateTransactionTx(ctx, tx, &models.Transaction{
 			UserID: subscription.UserID,
 			Amount: subscription.InitialPrice,
 			Type:   models.TransactionTypeWithdrawal,
 			Status: models.TransactionStatusSuccess,
-			Meta:   string(meta),
+			Meta:   meta,
 		})
 
 		if err != nil {

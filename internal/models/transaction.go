@@ -31,14 +31,14 @@ type TransactionMeta struct {
 }
 
 type Transaction struct {
-	ID uint64 `json:"id" db:"id"`
+	ID string `json:"id" db:"id"`
 
-	UserID     uint64            `json:"user_id" db:"user_id"`
-	Amount     uint32            `json:"amount" db:"amount"`
-	Meta       string            `json:"meta" db:"meta"`
-	ExternalID *string           `json:"external_id" db:"external_id"`
-	Type       TransactionType   `json:"type" db:"type"`
-	Status     TransactionStatus `json:"status" db:"status"`
+	UserID     uint64                 `json:"user_id" db:"user_id"`
+	Amount     uint32                 `json:"amount" db:"amount"`
+	Meta       map[string]interface{} `json:"meta" db:"meta"`
+	ExternalID *string                `json:"external_id" db:"external_id"`
+	Type       TransactionType        `json:"type" db:"type"`
+	Status     TransactionStatus      `json:"status" db:"status"`
 
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`

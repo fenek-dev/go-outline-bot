@@ -55,8 +55,17 @@ func Init() {
 	//--- Balance ---
 
 	Balance.Inline(
-		Balance.Row(BalanceRecharge),
+		Balance.Row(BalanceTopUp),
 		Balance.Row(BalanceHistory),
 		Balance.Row(CloseBtn),
+	)
+
+	TopUp.Inline(
+		TopUp.Row(TopUpClose),
+	)
+
+	Phone.Reply(
+		Phone.Row(PhoneSend),
+		Phone.Row(PhoneClose),
 	)
 }

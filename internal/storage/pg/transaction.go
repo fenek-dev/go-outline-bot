@@ -3,6 +3,7 @@ package pg
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/fenek-dev/go-outline-bot/internal/models"
 	"github.com/fenek-dev/go-outline-bot/internal/storage"
@@ -11,10 +12,11 @@ import (
 )
 
 func (p *Postgres) CreateTransactionTx(ctx context.Context, tx Executor, transaction *models.Transaction) (err error) {
+	var id string
 	err = pgxscan.Get(
 		ctx,
 		tx,
-		transaction,
+		&id,
 		"INSERT INTO transactions (user_id, amount, type, status, external_id, meta) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
 		transaction.UserID,
 		transaction.Amount,
@@ -24,11 +26,16 @@ func (p *Postgres) CreateTransactionTx(ctx context.Context, tx Executor, transac
 		transaction.Meta,
 	)
 
-	if errors.Is(err, pgx.ErrNoRows) {
-		return storage.ErrTransactionNotFound
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return storage.ErrTransactionNotFound
+		}
+		return fmt.Errorf("could not create transaction: %w", err)
 	}
 
-	return err
+	transaction.ID = id
+
+	return nil
 }
 
 func (p *Postgres) CreateTransaction(ctx context.Context, transaction *models.Transaction) (err error) {
@@ -48,7 +55,7 @@ func (p *Postgres) GetTransactionByExternalID(ctx context.Context, externalID st
 	return transaction, err
 }
 
-func (p *Postgres) GetTransaction(ctx context.Context, transactionID uint64) (transaction models.Transaction, err error) {
+func (p *Postgres) GetTransaction(ctx context.Context, transactionID string) (transaction models.Transaction, err error) {
 	err = pgxscan.Get(ctx, p.conn, &transaction, "SELECT * FROM transactions WHERE id = $1", transactionID)
 
 	if err != nil {
@@ -75,7 +82,7 @@ func (p *Postgres) GetTransactionsByUser(ctx context.Context, userID uint64) (tr
 	return transactions, err
 }
 
-func (p *Postgres) UpdateTransactionStatusTx(ctx context.Context, tx Executor, transactionID uint64, status models.TransactionStatus) (err error) {
+func (p *Postgres) UpdateTransactionStatusTx(ctx context.Context, tx Executor, transactionID string, status models.TransactionStatus) (err error) {
 	_, err = tx.Exec(ctx, "UPDATE transactions SET status = $1 WHERE id = $2", status, transactionID)
 
 	if errors.Is(err, pgx.ErrNoRows) {

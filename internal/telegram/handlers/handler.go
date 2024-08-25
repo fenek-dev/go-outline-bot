@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"github.com/fenek-dev/go-outline-bot/internal/telegram/state"
 	"log/slog"
 	"time"
 
@@ -13,9 +14,11 @@ type Option func(*Handlers)
 
 type Service interface {
 	CreateUser(ctx context.Context, user *telebot.User) (err error)
+	SetUserPhone(ctx context.Context, userID uint64, phone string) (err error)
 
 	GetBalance(ctx context.Context, userId uint64) (balance uint32, err error)
 	GetUser(ctx context.Context, userID uint64) (user models.User, err error)
+	RequestDeposit(ctx context.Context, user models.User, amount uint32) (redirectUri string, err error)
 
 	GetAllServers(ctx context.Context) (servers []models.Server, err error)
 
@@ -59,4 +62,14 @@ func WithLogger(logger *slog.Logger) Option {
 	return func(h *Handlers) {
 		h.log = logger
 	}
+}
+
+func (h *Handlers) TextHandler(c telebot.Context) error {
+	id := c.Sender().ID
+
+	callback := state.GetUserCallback(id)
+	if callback != nil {
+		return callback(c)
+	}
+	return nil
 }

@@ -2,9 +2,9 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/fenek-dev/go-outline-bot/pkg/utils"
 	"math"
 
 	"github.com/fenek-dev/go-outline-bot/internal/models"
@@ -40,6 +40,7 @@ func (s *Service) RequestDeposit(ctx context.Context, user models.User, amount u
 		Status:     models.TransactionStatusPending,
 		Type:       models.TransactionTypeDeposit,
 		ExternalID: lo.ToPtr(uuid.New().String()),
+		Meta:       make(map[string]interface{}),
 	}
 
 	err = s.storage.CreateTransaction(ctx, transaction)
@@ -129,21 +130,17 @@ func (s *Service) ConfirmDeposit(ctx context.Context, transactionExternalID stri
 				return fmt.Errorf("failed to increase partner balance: %w", err)
 			}
 
-			meta, err := json.Marshal(models.TransactionMeta{
+			meta := utils.StructToMap(models.TransactionMeta{
 				IsCommission: lo.ToPtr(true),
 				ReferalID:    lo.ToPtr(user.ID),
 			})
-
-			if err != nil {
-				return fmt.Errorf("failed to marshal meta: %w", err)
-			}
 
 			partnerTransaction := &models.Transaction{
 				UserID: *user.PartnerID,
 				Amount: commission,
 				Type:   models.TransactionTypeDeposit,
 				Status: models.TransactionStatusSuccess,
-				Meta:   string(meta),
+				Meta:   meta,
 			}
 
 			err = s.storage.CreateTransactionTx(ctx, tx, partnerTransaction)

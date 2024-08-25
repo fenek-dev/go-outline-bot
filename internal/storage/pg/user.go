@@ -46,3 +46,13 @@ func (p *Postgres) SetUserBonusUsedTx(ctx context.Context, tx Executor, userID u
 
 	return err
 }
+
+func (p *Postgres) SetUserPhone(ctx context.Context, userID uint64, phone string) (err error) {
+	_, err = p.conn.Exec(ctx, "UPDATE users SET phone = $1 WHERE id = $2", phone, userID)
+
+	if errors.Is(err, pgx.ErrNoRows) {
+		return storage.ErrUserNotFound
+	}
+
+	return err
+}

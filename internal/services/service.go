@@ -22,6 +22,7 @@ type Storage interface {
 	CreateUser(ctx context.Context, user *telebot.User) (err error)
 	GetUser(ctx context.Context, userID uint64) (user models.User, err error)
 	SetUserBonusUsedTx(ctx context.Context, tx pg.Executor, userID uint64) (err error)
+	SetUserPhone(ctx context.Context, userID uint64, phone string) (err error)
 
 	GetBalance(ctx context.Context, userID uint64) (balance uint32, err error)
 	IncBalanceTx(ctx context.Context, tx pg.Executor, userID uint64, amount uint32) (err error)
@@ -31,11 +32,11 @@ type Storage interface {
 	GetTariffsByServer(ctx context.Context, serverId uint64) (tariffs []models.Tariff, err error)
 
 	GetTransactionByExternalID(ctx context.Context, externalID string) (transaction models.Transaction, err error)
-	GetTransaction(ctx context.Context, transactionID uint64) (transaction models.Transaction, err error)
+	GetTransaction(ctx context.Context, transactionID string) (transaction models.Transaction, err error)
 	GetTransactionsByUser(ctx context.Context, userID uint64) (transactions []models.Transaction, err error)
 	CreateTransaction(ctx context.Context, transaction *models.Transaction) (err error)
 	CreateTransactionTx(ctx context.Context, tx pg.Executor, transaction *models.Transaction) (terr error)
-	UpdateTransactionStatusTx(ctx context.Context, tx pg.Executor, transactionID uint64, status models.TransactionStatus) (err error)
+	UpdateTransactionStatusTx(ctx context.Context, tx pg.Executor, transactionID string, status models.TransactionStatus) (err error)
 
 	GetSubscription(ctx context.Context, id uint64) (subscription models.Subscription, err error)
 	GetSubscriptionsByUser(ctx context.Context, userID uint64) (subscriptions []models.Subscription, err error)

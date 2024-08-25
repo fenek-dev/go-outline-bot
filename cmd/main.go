@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/fenek-dev/go-outline-bot/internal/notifier"
-	"github.com/fenek-dev/go-outline-bot/internal/worker"
 	"log"
 	"log/slog"
 	"net/http"
@@ -67,8 +66,8 @@ func main() {
 		panic(fmt.Errorf("can not connect to telegram bot: %w", err))
 	}
 
-	worker := worker.New(service, stopSignal)
-	go worker.Run()
+	//worker := worker.New(service, stopSignal)
+	//go worker.Run()
 
 	bot.Start()
 

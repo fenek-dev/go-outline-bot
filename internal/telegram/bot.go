@@ -29,6 +29,8 @@ func InitBot(cfg *configs.TelegramConfig, h *handlers.Handlers) (*telebot.Bot, e
 
 	markup.Init()
 
+	b.Handle(telebot.OnText, h.TextHandler)
+
 	b.Handle("/start", h.Start)
 
 	b.Handle(&markup.ClientListOpenBtn, h.OpenClientsList)
@@ -66,6 +68,12 @@ func InitBot(cfg *configs.TelegramConfig, h *handlers.Handlers) (*telebot.Bot, e
 	// Balance
 	b.Handle(&markup.BalanceOpenBtn, h.OpenBalance)
 	b.Handle(&markup.PartnerDepositOpenBalanceBtn, h.OpenBalance)
+	b.Handle(&markup.BalanceTopUp, h.TopUpBalance)
+	b.Handle(&markup.TopUpClose, h.TopUpClose)
+
+	// Phone
+	b.Handle(telebot.OnContact, h.HandlePhone)
+	b.Handle(&markup.PhoneClose, h.ClosePhone)
 
 	return b, nil
 }
