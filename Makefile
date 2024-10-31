@@ -16,10 +16,10 @@ db-down:
 # --- App ---
 app-up:
 	make db-up
-	docker-compose up -d --build
+	docker compose up -d --build
 
 app-down:
-	docker-compose down
+	docker compose down
 
 app-restart:
 	make app-down
