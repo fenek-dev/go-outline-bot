@@ -1,10 +1,12 @@
 networks:
   frontend:
-    external:
-      name: nginx-proxy
+    driver: bridge
+    name: nginx-proxy
+    external: true
   backend:
-    external:
-      name: ${COMPOSE_PROJECT_NAME}.backend
+    driver: bridge
+    name: ${COMPOSE_PROJECT_NAME}.backend
+    external: true
 
 services:
   postgres:

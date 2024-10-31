@@ -1,3 +1,13 @@
+networks:
+  frontend:
+    driver: bridge
+    name: nginx-proxy
+    external: true
+  backend:
+    driver: bridge
+    name: ${COMPOSE_PROJECT_NAME}.backend
+    external: true
+
 services:
   golang:
     build:
