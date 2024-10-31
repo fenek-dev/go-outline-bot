@@ -15,7 +15,6 @@ db-down:
 
 # --- App ---
 app-up:
-	make db-up
 	docker compose up -d --build
 
 app-down:
