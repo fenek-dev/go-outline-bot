@@ -1,0 +1,24 @@
+networks:
+  frontend:
+    driver: bridge
+    name: nginx-proxy
+    external: true
+  backend:
+    driver: bridge
+    name: ${COMPOSE_PROJECT_NAME}.backend
+    external: true
+
+services:
+  golang:
+    build:
+      context: ..
+      dockerfile: ./docker/build/golang/Dockerfile
+    restart: unless-stopped
+    container_name: ${COMPOSE_PROJECT_NAME}.go
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    networks:
+      - frontend
+      - backend

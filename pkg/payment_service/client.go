@@ -7,7 +7,6 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"sync"
 )
 
 //go:generate mockery --name HTTPClient --output ./mocks --filename http_client.go
@@ -15,15 +14,12 @@ type HTTPClient interface {
 	Do(req *http.Request) (*http.Response, error)
 }
 
-type Options struct {
-	BaseUrl string
-}
+type Option func(*Client)
 
 type Client struct {
-	mu         sync.Mutex
+	BaseUrl    string
 	log        *slog.Logger
-	HTTPClient HTTPClient
-	Options    *Options
+	httpClient HTTPClient
 }
 
 type ErrorResponse struct {
@@ -35,16 +31,28 @@ func (r *ErrorResponse) Error() string {
 	return r.Message
 }
 
-func NewClient(options *Options, logger *slog.Logger, httpClient HTTPClient) *Client {
-	if httpClient == nil {
-		httpClient = http.DefaultClient
+func NewClient(baseUrl string, opts ...Option) *Client {
+	client := &Client{
+		BaseUrl:    baseUrl,
+		httpClient: http.DefaultClient,
 	}
 
-	return &Client{
-		mu:         sync.Mutex{},
-		log:        logger,
-		HTTPClient: httpClient,
-		Options:    options,
+	for _, opt := range opts {
+		opt(client)
+	}
+
+	return client
+}
+
+func WithLogger(logger *slog.Logger) Option {
+	return func(s *Client) {
+		s.log = logger
+	}
+}
+
+func WithHTTPClient(client HTTPClient) Option {
+	return func(s *Client) {
+		s.httpClient = client
 	}
 }
 
@@ -66,7 +74,7 @@ func (c *Client) Send(req *http.Request, v interface{}) error {
 		req.Header.Set("Content-type", "application/json")
 	}
 
-	resp, err = c.HTTPClient.Do(req)
+	resp, err = c.httpClient.Do(req)
 
 	if err != nil {
 		return err
@@ -111,5 +119,5 @@ func (c *Client) NewRequest(ctx context.Context, method, url string, payload int
 		}
 		buf = bytes.NewBuffer(b)
 	}
-	return http.NewRequestWithContext(ctx, method, c.Options.BaseUrl+"/"+url, buf)
+	return http.NewRequestWithContext(ctx, method, c.BaseUrl+"/"+url, buf)
 }
